@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Post List</title>
+    <!-- Include Bootstrap CSS from the internet -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="display-4 text-center mt-5">Blog Posts</h1>
+        <ul class="list-group mb-5">
+            {% for post in posts %}
+                <li class="list-group-item">{{ post.title }}</li>
+            {% endfor %}
+        </ul>
+
+        <div class="jumbotron">
+            <h2 class="display-5">About Our Blog</h2>
+            <p class="lead">Welcome to our blog where we share interesting stories and articles.</p>
+            <a href="#" class="btn btn-primary">Read More</a>
+        </div>
+    </div>
+
+    <footer class="bg-light text-center py-3 mt-5">
+        &copy; {{ 2023 }} The Hot News
+    </footer>
+
+    <!-- Include Bootstrap JavaScript from the internet -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
+
