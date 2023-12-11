@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.views.generic import TemplateView, ListView, DetailView
-from django.shortcuts import render, redirect  # Import redirect
+from django.shortcuts import render, redirect, get_object_or_404  # Import redirect
 from .models import BlogPost, Post, Tag
 from .forms import BlogPostForm
 from django.contrib.auth.decorators import login_required
@@ -11,7 +11,20 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 
-# Redirect to the login page if not authenticated
+
+def edit_blog_post(request, pk):
+    post = get_object_or_404(BlogPost, pk=pk)
+
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+            # Redirect to the blog post list
+            return redirect('blog:blog_post_list')
+    else:
+        form = BlogPostForm(instance=post)
+
+    return render(request, 'edit_blog_post.html', {'form': form, 'post': post})
 
 
 @login_required

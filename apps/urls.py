@@ -36,4 +36,5 @@ urlpatterns = [
     path('blog/create/', views.create_blog_post, name='create_blog_post'),
     path('create-blog/', views.create_blog, name='create_blog_post'),
     path('about/', views.about, name='about.html'),
+    path('edit-blog/<int:pk>/', views.edit_blog_post, name='edit_blog_post'),
 ]
