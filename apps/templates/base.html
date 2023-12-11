@@ -6,34 +6,57 @@
     <title>{% block title %}The Hot News{% endblock %}</title>
     <!-- Add your CSS and JavaScript links here -->
     <!-- Add Bootstrap CSS from the web -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
-
-<!-- Add Bootstrap JavaScript from the web -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/about/">About</a></li>
-                <li><a href="/blog/">Blogs</a></li>
-                <li><a href="/create-blog/">Create</a></li>
-                <!-- Add more navigation links as needed -->
-            </ul>
-        </nav>
-    </header>
 
-    <main>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            {% block content %}{% endblock %}
+            <a class="navbar-brand" href="/">The Hot News</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about/">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog/">Blogs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/create-blog/">Create</a>
+                    </li>
+                    <!-- Add more navigation links as needed -->
+                </ul>
+
+                <!-- Logout link -->
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="container mt-4">
+        {% block content %}{% endblock %}
     </main>
 
-    <footer>
+    <!-- Footer -->
+    <footer class="bg-light text-center p-3 mt-4">
         <p>&copy; {% now "Y" %} The AI and ML News and Blogs </p>
     </footer>
+
+    <!-- Add Bootstrap JavaScript from the web -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

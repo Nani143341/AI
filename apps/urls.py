@@ -23,6 +23,12 @@ app_name = 'blog'  # Add this line to specify the app namespace
 
 urlpatterns = [
     path('hello/', views.hello, name='hello'),
+    path('', views.home, name='home'),
+    path('accounts/profile/', views.user_profile, name='user_profile'),
+    path('login/', views.loginPage, name='login'),
+    path('logout/', views.logoutUser, name='logout'),
+    path('register/', views.register, name='register'),
+    path('index/', views.IndexView.as_view(), name='index'),
     path('', IndexView.as_view(), name='home'),
     path('blog/', views.BlogPostListView.as_view(), name='blog_post_list.html'),
     path('blog/<int:pk>/', views.BlogPostDetailView.as_view(),
