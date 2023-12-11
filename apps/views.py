@@ -94,7 +94,7 @@ def create_blog_post(request):
         form = BlogPostForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('blog_post_list')
+            return redirect('blog:blog_post_list')
     else:
         form = BlogPostForm()
     return render(request, 'blog_post_form.html', {'form': form})
@@ -103,10 +103,11 @@ def create_blog_post(request):
 @login_required
 def create_blog(request):
     if request.method == 'POST':
+        pdb.set_trace()
         form = BlogPostForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('blog_post_list')
+            return redirect('blog:blog_post_list')
     else:
         form = BlogPostForm()
 
