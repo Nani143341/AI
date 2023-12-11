@@ -1,39 +1,36 @@
 {% extends 'base.html' %}
 
-{% load crispy_forms_tags %}
-
 {% block content %}
-  <div class="container">
-    <h1 class="display-4 text-center mt-5">Welcome to Our Blog on AI and Data Science</h1>
-    <p class="lead text-center">We take an immersive look on the latest technologies shaping up our future</p>
-    <a href="#" class="btn btn-primary btn-lg d-block mx-auto">Learn more</a>
+  <!-- Hero Section -->
+  <div class="container mt-5">
+    <div class="text-center">
+      <h1 class="display-4 mb-3">Welcome to Our Blog on AI and Data Science</h1>
+      <p class="lead">We take an immersive look at the latest technologies shaping our future.</p>
+      <a href="#" class="btn btn-primary btn-lg">Learn More</a>
+    </div>
   </div>
-</ href=> # added image
 
+  <!-- Latest News Section -->
   <div class="container mt-5">
     <div class="row">
       <div class="col-lg-8">
         <h2 class="mb-4">Latest News</h2>
         <ul class="list-group">
-          <a href="https://www.technologyreview.com/2022/05/27/1052826/ai-reinforcement-learning-self-driving-cars-autonomous-vehicles-wayve-waabi-cruise/">AI Reinforcement Learning Is the New Hope for Self-Driving Cars</a>
-	<a href="https://www.w3schools.com/django/django_templates.php">Robotics</a>
-	<a href="https://technofaq.org/posts/2023/10/nlp-powered-automated-texting-advancing-conversational-agents-and-virtual-assistants/">NLP-Powered Automated Texting: Advancing Conversational Agents and Virtual Assistants</a>
-
+          <li class="list-group-item"><a href="https://www.technologyreview.com/2022/05/27/1052826/ai-reinforcement-learning-self-driving-cars-autonomous-vehicles-wayve-waabi-cruise/">AI Reinforcement Learning Is the New Hope for Self-Driving Cars</a></li>
+          <li class="list-group-item"><a href="https://www.w3schools.com/django/django_templates.php">Robotics</a></li>
+          <li class="list-group-item"><a href="https://technofaq.org/posts/2023/10/nlp-powered-automated-texting-advancing-conversational-agents-and-virtual-assistants/">NLP-Powered Automated Texting: Advancing Conversational Agents and Virtual Assistants</a></li>
         </ul>
       </div>
 
       <div class="col-lg-4">
         <h2 class="mb-4">About Us</h2>
-        <p>We aim to help you stay up-to-date on the latest developments in artificial intelligence (AI) and related fields. Our goal is to provide you with comprehensive and informative responses to your questions and help you navigate the ever-changing landscape of AI.
-
-We use a combination of cutting-edge AI models and human expertise to generate our responses. Our team of experts is dedicated to providing you with the most accurate and up-to-date information available.
-
-Whether you’re a student, researcher, or simply interested in learning more about AI, we’re here to help. Our mission is to make AI accessible to everyone and help you stay informed about the latest breakthroughs in this exciting field. Feel free to contact us for more information.</p>
+        <p>We aim to keep you up-to-date on the latest developments in artificial intelligence (AI) and related fields. Our team of experts uses cutting-edge AI models and human expertise to provide you with accurate and up-to-date information.</p>
         <a href="#" class="btn btn-secondary">Contact Us</a>
       </div>
     </div>
   </div>
 
+  <!-- Latest Technology Stories Section -->
   <div class="container mt-5">
     <h2 class="mb-4">Latest Technology Stories</h2>
     <div class="row">
@@ -42,11 +39,11 @@ Whether you’re a student, researcher, or simply interested in learning more ab
         <div class="card mb-4">
           <div class="card-body">
             <h5 class="card-title">Artificial Intelligence Advancements</h5>
-            <a href="https://machinelearningmastery.com/training-the-transformer-model/">Transformers, All you need to know</a>, 
-            <a href="https://www.msn.com/en-us/news/technology/theres-a-new-king-of-the-gpus-in-steams-september-hardware-survey/ar-AA1hCn2U">There’s a new king of the GPUs in Steam’s September hardware survey</a>, 
-            <a href="https://www.msn.com/en-us/lifestyle/shopping/amd-adds-fluid-motion-frames-support-for-rx-6000-gpus/ar-AA1hODS7">TAMD Adds Fluid Motion Frames Support for RX 6000 GPUs</a>
             <p class="card-text">Discover the latest breakthroughs in AI technology that are shaping the future.</p>
-            <a href="#" class="btn btn-primary">Read More</a>
+            <a href="https://machinelearningmastery.com/training-the-transformer-model/">Transformers, All you need to know</a><br>
+            <a href="https://www.msn.com/en-us/news/technology/theres-a-new-king-of-the-gpus-in-steams-september-hardware-survey/ar-AA1hCn2U">There’s a new king of the GPUs in Steam’s September hardware survey</a><br>
+            <a href="https://www.msn.com/en-us/lifestyle/shopping/amd-adds-fluid-motion-frames-support-for-rx-6000-gpus/ar-AA1hODS7">AMD Adds Fluid Motion Frames Support for RX 6000 GPUs</a>
+            <a href="#" class="btn btn-primary mt-3">Read More</a>
           </div>
         </div>
       </div>
@@ -56,11 +53,11 @@ Whether you’re a student, researcher, or simply interested in learning more ab
         <div class="card mb-4">
           <div class="card-body">
             <h5 class="card-title">Data Science Innovations</h5>
-            <a href="https://www.news-medical.net/news/20231004/Application-of-data-science-in-health-research-to-benefit-the-African-population.aspx">Application of data science in health research to benefit the African population</a>, 
-            <a href="https://techbullion.com/the-future-of-data-science-trends-and-predictions/">The Future of Data Science: Trends and Predictions</a>, 
-            <a href=""> Learn the fundamentals of Data Science and Machine Learning</a>
             <p class="card-text">Stay updated on the latest trends and innovations in the field of data science.</p>
-            <a href="#" class="btn btn-primary">Read More</a>
+            <a href="https://www.news-medical.net/news/20231004/Application-of-data-science-in-health-research-to-benefit-the-African-population.aspx">Application of data science in health research to benefit the African population</a><br>
+            <a href="https://techbullion.com/the-future-of-data-science-trends-and-predictions/">The Future of Data Science: Trends and Predictions</a><br>
+            <a href="#">Learn the fundamentals of Data Science and Machine Learning</a>
+            <a href="#" class="btn btn-primary mt-3">Read More</a>
           </div>
         </div>
       </div>
@@ -70,17 +67,12 @@ Whether you’re a student, researcher, or simply interested in learning more ab
         <div class="card mb-4">
           <div class="card-body">
             <h5 class="card-title">Machine Learning Breakthroughs</h5>
-            <a href=""> Learn the fundamentals of Data Science and Machine Learning</a>
             <p class="card-text">Explore the groundbreaking developments in machine learning and deep learning.</p>
-            <a href="#" class="btn btn-primary">Read More</a>
+            <a href="#">Learn the fundamentals of Data Science and Machine Learning</a>
+            <a href="#" class="btn btn-primary mt-3">Read More</a>
           </div>
         </div>
       </div>
     </div>
   </div>
 {% endblock content %}
-<!-- Add Bootstrap CSS and JavaScript from the web -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
-
-
