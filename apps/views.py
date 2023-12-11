@@ -1,5 +1,4 @@
 from django.contrib.auth.forms import UserCreationForm
-import pdb
 from django.http import HttpResponse
 from django.views.generic import TemplateView, ListView, DetailView
 from django.shortcuts import render, redirect  # Import redirect
@@ -11,14 +10,12 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-import pdb
 
 # Redirect to the login page if not authenticated
 
 
 @login_required
 def loginPage(request):
-    pdb.set_trace()
     if request.user.is_authenticated:
         return redirect('/')
     else:
@@ -103,7 +100,6 @@ def create_blog_post(request):
 @login_required
 def create_blog(request):
     if request.method == 'POST':
-        pdb.set_trace()
         form = BlogPostForm(request.POST)
         if form.is_valid():
             form.save()
@@ -148,7 +144,6 @@ class IndexView(TemplateView):
         return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
-        pdb.set_trace()
 
         # Retrieve username and password from the POST request
         username = request.POST.get('username')
