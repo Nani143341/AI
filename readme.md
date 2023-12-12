@@ -1,6 +1,6 @@
 My Django Web Application
 This Django web application is a simple blog where users can create, view, edit, and delete blog posts on AI and ML.
-
+This project is a simple project
 Features
 Create, read, update, and delete blog posts.
 Admin interface to manage blog posts.
