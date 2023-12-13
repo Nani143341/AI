@@ -1,3 +1,7 @@
+{% extends 'base.html' %}
+
+{% block title %}About{% endblock %}
+{% block content %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,15 +20,15 @@
             <div class="col-md-6">
                 <h2>Creation Date</h2>
                 <p>
-                    Our blog was created on {{ Dec. 7, 2023 }}. We have been sharing knowledge and insights since then,
+                    Our blog was created on December 2023. We have been sharing knowledge and insights since then,
                     and our commitment to providing valuable content remains unwavering.
                 </p>
             </div>
             <div class="col-md-6">
                 <h2>Creator</h2>
                 <p>
-                    The blog was founded by {{ Our Group }}. With a passion for writing and a deep interest in the subject matter,
-                    {{ The Creator }} envisioned this platform as a place to explore and discuss various topics.
+                    The blog was founded by Our Group. With a passion for writing and a deep interest in the subject matter,
+                    Pat365 envisioned this platform as a place to explore and discuss various topics.
                 </p>
             </div>
         </div>
@@ -40,12 +44,10 @@
         </div>
     </div>
 
-    <footer class="bg-light text-center py-3 mt-5">
-        &copy; {{ 2023 }} The AI and ML News and Blogs
-    </footer>
 
     <!-- Include Bootstrap JavaScript from the internet -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
 
+{% endblock %}

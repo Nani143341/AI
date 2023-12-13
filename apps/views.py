@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.views.generic import TemplateView, ListView, DetailView
@@ -10,8 +11,10 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
 
 
+@login_required
 def edit_blog_post(request, pk):
     post = get_object_or_404(BlogPost, pk=pk)
 
@@ -49,7 +52,7 @@ def loginPage(request):
 @login_required
 def logoutUser(request):
     logout(request)
-    return redirect('login')
+    return redirect(reverse('blog:login'))
 
 
 def register(request):
@@ -73,13 +76,22 @@ class BlogPostListView(ListView):
     template_name = 'blog_post_list.html'
     context_object_name = 'posts'
 
-    # Override the get_context_data method to add extra context data
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+
+        if query:
+            return BlogPost.objects.filter(Q(title__icontains=query))
+        else:
+            return BlogPost.objects.all()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         latest_posts = Post.objects.all().order_by('-pub_date')[:5]
         popular_tags = Tag.objects.filter(popular=True)
         context['latest_posts'] = latest_posts
         context['popular_tags'] = popular_tags
+        context['query'] = self.request.GET.get('q', '')
+        context['message'] = f'Search results for "{context["query"]}"' if context['query'] else 'All Blog Posts'
         return context
 
 
@@ -103,6 +115,8 @@ def create_blog_post(request):
     if request.method == 'POST':
         form = BlogPostForm(request.POST)
         if form.is_valid():
+            form.instance.user = request.user
+            form.instance.pub_date = timezone.now()
             form.save()
             return redirect('blog:blog_post_list')
     else:
@@ -115,6 +129,8 @@ def create_blog(request):
     if request.method == 'POST':
         form = BlogPostForm(request.POST)
         if form.is_valid():
+            form.instance.user = request.user
+            form.instance.pub_date = timezone.now()
             form.save()
             return redirect('blog:blog_post_list')
     else:
@@ -123,11 +139,13 @@ def create_blog(request):
     return render(request, 'create_blog_post.html', {'form': form})
 
 
+@login_required
 def blog_post_list(request):
     posts = BlogPost.objects.all()
     return render(request, 'blog_post_list.html', {'posts': posts})
 
 
+@login_required
 def about(request):
     if request.method == 'POST':
         form = BlogPostForm(request.POST)

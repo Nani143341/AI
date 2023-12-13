@@ -31,9 +31,6 @@ Tests
 Navigate to the root directory where all the project files are located.
 Run tests using python manage.py test.
 
-Static Files
-Static files (CSS, JavaScript) are served using Django's static file handling. Ensure the STATICFILES_DIRS and STATIC_URL settings are configured properly.
-
 Customizing the Admin Site
 The admin interface is customized by creating a custom admin.py file in the relevant app and registering models with custom admin classes.
 

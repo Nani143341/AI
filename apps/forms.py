@@ -18,5 +18,4 @@ class MyForm(forms.ModelForm):
 class BlogPostForm(forms.ModelForm):
     class Meta:
         model = BlogPost
-        fields = ['title', 'content', 'pub_date']
-
+        fields = ['title', 'content']
