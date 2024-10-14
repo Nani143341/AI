@@ -4,74 +4,111 @@
   <!-- Hero Section -->
   <div class="container mt-5">
     <div class="text-center">
-      <h1 class="display-4 mb-3">Welcome to Our Blog on AI and Data Science</h1>
-      <p class="lead">We take an immersive look at the latest technologies shaping our future.</p>
-      <a href="#" class="btn btn-primary btn-lg">Learn More</a>
+      <h1 class="display-4 mb-3">Welcome to AI Learning Hub</h1>
+      <p class="lead">Your gateway to AI education and cutting-edge technology insights</p>
+      <a href="{% url 'blog:course_list' %}" class="btn btn-primary btn-lg">Explore Courses</a>
     </div>
   </div>
 
-  <!-- Latest News Section -->
+  <!-- Premium Courses Section -->
+  <div class="container mt-5">
+    <h2 class="mb-4">Premium Courses</h2>
+    <div class="row">
+      {% for course in premium_courses %}
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title">{{ course.title }}</h5>
+              <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+              <span class="text-muted">Difficulty: {{ course.get_difficulty_display }}</span>
+              <span class="badge badge-warning ml-2">Premium</span>
+              <a href="{% url 'blog:course_detail' course.slug %}" class="btn btn-primary mt-3">Enroll Now</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Featured Courses Section -->
+  <div class="container mt-5">
+    <h2 class="mb-4">Featured Courses</h2>
+    <div class="row">
+      {% for course in regular_courses %}
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title">{{ course.title }}</h5>
+              <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+              <span class="text-muted">Difficulty: {{ course.get_difficulty_display }}</span>
+              <a href="{% url 'blog:course_detail' course.slug %}" class="btn btn-primary mt-3">Enroll Now</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Latest AI Insights Section -->
   <div class="container mt-5">
     <div class="row">
       <div class="col-lg-8">
-        <h2 class="mb-4">Latest News</h2>
+        <h2 class="mb-4">AI News Feed</h2>
         <ul class="list-group">
-          <li class="list-group-item"><a href="https://www.technologyreview.com/2022/05/27/1052826/ai-reinforcement-learning-self-driving-cars-autonomous-vehicles-wayve-waabi-cruise/">AI Reinforcement Learning Is the New Hope for Self-Driving Cars</a></li>
-          <li class="list-group-item"><a href="https://www.w3schools.com/django/django_templates.php">Robotics</a></li>
-          <li class="list-group-item"><a href="https://technofaq.org/posts/2023/10/nlp-powered-automated-texting-advancing-conversational-agents-and-virtual-assistants/">NLP-Powered Automated Texting: Advancing Conversational Agents and Virtual Assistants</a></li>
+          {% for news in news_feed %}
+            <li class="list-group-item">
+              <a href="{{ news.url }}" target="_blank">{{ news.title }}</a>
+              <small class="text-muted d-block">Source: {{ news.source }}</small>
+            </li>
+          {% endfor %}
         </ul>
-      </div>
-
-      <div class="col-lg-4">
-        <h2 class="mb-4">About Us</h2>
-        <p>We aim to keep you up-to-date on the latest developments in artificial intelligence (AI) and related fields. Our team of experts uses cutting-edge AI models and human expertise to provide you with accurate and up-to-date information.</p>
-        <a href="#" class="btn btn-secondary">Contact Us</a>
       </div>
     </div>
   </div>
 
-  <!-- Latest Technology Stories Section -->
+  <!-- Community Features Section -->
   <div class="container mt-5">
-    <h2 class="mb-4">Latest Technology Stories</h2>
+    <h2 class="mb-4">Community Features</h2>
     <div class="row">
-      <!-- Latest AI News -->
-      <div class="col-md-4">
+      <div class="col-md-6">
         <div class="card mb-4">
           <div class="card-body">
-            <h5 class="card-title">Artificial Intelligence Advancements</h5>
-            <p class="card-text">Discover the latest breakthroughs in AI technology that are shaping the future.</p>
-            <a href="https://machinelearningmastery.com/training-the-transformer-model/">Transformers, All you need to know</a><br>
-            <a href="https://www.msn.com/en-us/news/technology/theres-a-new-king-of-the-gpus-in-steams-september-hardware-survey/ar-AA1hCn2U">There’s a new king of the GPUs in Steam’s September hardware survey</a><br>
-            <a href="https://www.msn.com/en-us/lifestyle/shopping/amd-adds-fluid-motion-frames-support-for-rx-6000-gpus/ar-AA1hODS7">AMD Adds Fluid Motion Frames Support for RX 6000 GPUs</a>
-            <a href="#" class="btn btn-primary mt-3">Read More</a>
+            <h5 class="card-title">Discussion Forums</h5>
+            <p class="card-text">Join the conversation and discuss AI topics with fellow learners.</p>
+            <a href="{% url 'blog:forum_list' %}" class="btn btn-primary">Visit Forums</a>
           </div>
         </div>
       </div>
-      
-      <!-- Latest Data Science News -->
-      <div class="col-md-4">
+      <div class="col-md-6">
         <div class="card mb-4">
           <div class="card-body">
-            <h5 class="card-title">Data Science Innovations</h5>
-            <p class="card-text">Stay updated on the latest trends and innovations in the field of data science.</p>
-            <a href="https://www.news-medical.net/news/20231004/Application-of-data-science-in-health-research-to-benefit-the-African-population.aspx">Application of data science in health research to benefit the African population</a><br>
-            <a href="https://techbullion.com/the-future-of-data-science-trends-and-predictions/">The Future of Data Science: Trends and Predictions</a><br>
-            <a href="#">Learn the fundamentals of Data Science and Machine Learning</a>
-            <a href="#" class="btn btn-primary mt-3">Read More</a>
+            <h5 class="card-title">Leaderboard</h5>
+            <p class="card-text">See how you rank among other learners in our community.</p>
+            <a href="{% url 'blog:leaderboard' %}" class="btn btn-primary">View Leaderboard</a>
           </div>
         </div>
       </div>
-      
-      <!-- Latest Machine Learning News -->
-      <div class="col-md-4">
-        <div class="card mb-4">
-          <div class="card-body">
-            <h5 class="card-title">Machine Learning Breakthroughs</h5>
-            <p class="card-text">Explore the groundbreaking developments in machine learning and deep learning.</p>
-            <a href="#">Learn the fundamentals of Data Science and Machine Learning</a>
-            <a href="#" class="btn btn-primary mt-3">Read More</a>
-          </div>
-        </div>
+    </div>
+  </div>
+
+  <!-- Embedded YouTube Videos Section -->
+  <div class="container mt-5">
+    <h2 class="mb-4">Trending News & Courses Videos</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <h3>Trending News</h3>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/gqUQbjsYZLQ" frameborder="0" allowfullscreen></iframe>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/Ih-SoOrvl4Q" frameborder="0" allowfullscreen></iframe>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/mKYbEk-kAsA" frameborder="0" allowfullscreen></iframe>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/SMnBnGQqlR4" frameborder="0" allowfullscreen></iframe>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/spsG4G2sbrw" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <div class="col-md-6">
+        <h3>Popular Courses</h3>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/ad79nYk2keg" frameborder="0" allowfullscreen></iframe>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/gZmobeGL0Yg" frameborder="0" allowfullscreen></iframe>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/Gv9_4yMHFhI" frameborder="0" allowfullscreen></iframe>
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/E0Hmnixke2g" frameborder="0" allowfullscreen></iframe>
       </div>
     </div>
   </div>

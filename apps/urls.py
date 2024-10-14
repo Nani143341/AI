@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+
 from . import views
 from .views import IndexView  # Import IndexView here
 
@@ -26,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', views.hello, name='hello'),
     path('', views.home, name='home'),
+    path('premium/', views.premium_dashboard, name='premium_dashboard'),
     path('accounts/profile/', views.user_profile, name='user_profile'),
     path('login/', views.loginPage, name='login'),
     path('logout/', views.logoutUser, name='logout'),
@@ -39,4 +41,12 @@ urlpatterns = [
     path('create-blog/', views.create_blog, name='create_blog_post'),
     path('about/', views.about, name='about.html'),
     path('edit-blog/<int:pk>/', views.edit_blog_post, name='edit_blog_post'),
+    path('courses/', views.course_list, name='course_list'),
+    path('course/<slug:slug>/', views.course_detail, name='course_detail'),
+    path('articles/', views.article_list, name='article_list'),
+    path('article/<int:id>/', views.article_detail, name='article_detail'),
+    path('forum/', views.forum_list, name='forum_list'),
+    path('leaderboard/', views.leaderboard, name='leaderboard'),
+    path('upgrade/', views.upgrade_to_premium, name='upgrade_to_premium'),
+    path('process-payment/', views.process_payment, name='process_payment'),
 ]
