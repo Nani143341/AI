@@ -1,0 +1,35 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-docker-images-repo/svchelloworld:$COMMIT_SHA', '.']
+  
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-docker-images-repo/svchelloworld:$COMMIT_SHA']
+  
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'beta'
+      - 'run'
+      - 'deploy'
+      - 'ai'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-docker-images-repo/svchelloworld:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '1'
+      - '--allow-unauthenticated'
+
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-docker-images-repo/svchelloworld'
+
+logsBucket: "gs://your-logs-bucket"  # Add your logs bucket here
+
+options:
+  logging: CLOUD_LOGGING_ONLY  # Option to use Cloud Logging for logs (or NONE if you want to disable)
+  # Alternatively, you can use REGIONAL_USER_OWNED_BUCKET:
+  # defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
