@@ -27,9 +27,4 @@ steps:
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-docker-images-repo/svchelloworld'
 
-logsBucket: "gs://your-logs-bucket"  # Add your logs bucket here
-
-options:
-  logging: REGIONAL_USER_OWNED_BUCKET  # Option to use Cloud Logging for logs (or NONE if you want to disable)
-  # Alternatively, you can use REGIONAL_USER_OWNED_BUCKET:
-  # defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+logsBucket: "gs://samiri-bucket"  # Add your logs bucket here
