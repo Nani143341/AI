@@ -27,4 +27,4 @@ steps:
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-docker-images-repo/svchelloworld'
 
-logsBucket: "gs://samiri-bucket"  # Add your logs bucket here
+logsBucket: "gs://naveen-gupi-bucket"  # Add your logs bucket here
