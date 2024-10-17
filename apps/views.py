@@ -23,9 +23,10 @@ from googleapiclient.errors import HttpError
 
 from .forms import (ArticleForm, BlogPostForm, CourseForm, ForumCommentForm,
                     ForumThreadForm, QuizForm, UserRegistrationForm)
-from .models import (Article, BlogPost, Course, ForumComment, ForumThread,
-                     Post, Quiz, Tag, UserBadge, UserCourseEnrollment,
-                     UserCourseProgress, UserProfile, UserQuizResult)
+from .models import (Article, BlogPost, Course,  # Import your models
+                     ForumComment, ForumThread, Post, Question, Quiz, Tag,
+                     UserBadge, UserCourseEnrollment, UserCourseProgress,
+                     UserProfile, UserQuizResult)
 
 
 @login_required
@@ -478,6 +479,24 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
+def quiz_view(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+
+    if request.method == 'POST':
+        # Handle quiz submission
+        score = 0
+        for question in quiz.questions.all():  # Using the related_name
+            user_answer = request.POST.get(str(question.id))
+            if user_answer == question.correct_answer:  # Assuming a correct_answer field exists
+                score += 1
+
+        # Save the score or handle it as needed
+        return render(request, 'quiz_result.html', {'quiz': quiz, 'score': score})
+
+    questions = quiz.questions.all()  # Access the questions through related_name
+    return render(request, 'quiz.html', {'quiz': quiz, 'questions': questions})
+
+
 @login_required
 def profile(request):
     user_profile = request.user.userprofile
@@ -609,8 +628,9 @@ def course_detail(request, slug):
                 progress.save()
                 is_enrolled = True  # Set the flag to True
         elif 'start_quiz' in request.POST:
-            quiz = get_object_or_404(Quiz, course=course)
-            return redirect('quiz', quiz_id=quiz.id)
+            quiz_id = request.POST.get('quiz_id')
+            if quiz_id:
+                return redirect('blog:quiz', quiz_id=quiz_id)
 
     # Check if the user is already enrolled
     is_enrolled = UserCourseEnrollment.objects.filter(

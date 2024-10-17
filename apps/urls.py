@@ -53,5 +53,6 @@ urlpatterns = [
          views.subscription_required, name='subscription_required'),
     path('subscription-required/<slug:slug>/',
          views.subscription_required, name='subscription_required'),
+    path('quiz/<int:quiz_id>/', views.quiz_view, name='quiz'),
 
 ]

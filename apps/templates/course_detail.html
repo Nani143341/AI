@@ -37,15 +37,17 @@
       </form>
 
       <!-- Quiz Section -->
-      {% if quiz %}
-        <form method="POST" class="mt-4">
-          {% csrf_token %}
-          <input type="hidden" name="start_quiz" value="1">
-          <button type="submit" class="btn btn-primary">Start Quiz: {{ quiz.title }}</button>
-        </form>
-      {% else %}
-        <p>No quiz available for this course.</p>
-      {% endif %}
+{% if quiz %}
+    <form method="POST" class="mt-4">
+        {% csrf_token %}
+        <input type="hidden" name="start_quiz" value="1">
+        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">  <!-- Add this line -->
+        <button type="submit" class="btn btn-primary">Start Quiz: {{ quiz.title }}</button>
+    </form>
+{% else %}
+    <p>No quiz available for this course.</p>
+{% endif %}
+
 
     {% else %}
       <!-- Enrollment Form -->
