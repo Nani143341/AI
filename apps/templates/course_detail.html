@@ -11,14 +11,12 @@
       <span class="badge badge-warning">Premium</span>
     {% endif %}
 
-    <!-- Embedded Course Video -->
-    <div>
-      {% if course.video_url %}
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/{{ course.video_url|slice:"v="|last }}" frameborder="0" allowfullscreen></iframe>
-      {% endif %}
-    </div>
+    {% if first_video_id %}
+      <iframe width="800" height="450" src="https://www.youtube.com/embed/{{ first_video_id }}" frameborder="0" allowfullscreen></iframe>
+    {% else %}
+      <p>No video found for this course.</p>
+    {% endif %}
 
-    <!-- Enrollment Information -->
     {% if is_enrolled %}
       <div class="alert alert-success mt-4">
         You have successfully enrolled in this course!
@@ -56,14 +54,14 @@
         <input type="hidden" name="enroll" value="1">
         <button type="submit" class="btn btn-primary">Enroll in Course</button>
       </form>
-    {% endif %}
+    {% endif %} <!-- Closing for is_enrolled -->
 
     <!-- User Profile Information -->
     <div class="mt-5">
       <h3>Your Profile</h3>
       <p>Username: {{ request.user.username }}</p>
       <p>Email: {{ request.user.email }}</p>
-      <p>Premium Status: {% if request.user.userprofile.is_premium %} Yes {% else %} No {% endif %}</p>
+      <p>Premium Status: {% if request.user.userprofile.subscription_status %} Yes {% else %} No {% endif %}</p>
     </div>
   </div>
 {% endblock %}

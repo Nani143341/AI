@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +29,8 @@ SECRET_KEY = 'django-insecure-6za04a_z$ri*gp8k(u+r785+qxh=6r%&$gvnbwauv)3q##^esg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ailearninghub-519609767751.us-central1.run.app','ai-519609767751.us-central1.run.app', '127.0.0.1']
+ALLOWED_HOSTS = ['ailearninghub-519609767751.us-central1.run.app',
+                 'ai-519609767751.us-central1.run.app', '127.0.0.1']
 
 
 # Application definition
@@ -131,3 +132,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# settings.py
+YOUTUBE_API_KEY = 'AIzaSyDF-V4T8t9hhagfB09OXlAiS4HU9nrtJEY'

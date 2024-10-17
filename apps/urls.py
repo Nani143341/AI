@@ -49,4 +49,9 @@ urlpatterns = [
     path('leaderboard/', views.leaderboard, name='leaderboard'),
     path('upgrade/', views.upgrade_to_premium, name='upgrade_to_premium'),
     path('process-payment/', views.process_payment, name='process_payment'),
+    path('subscription-required/',
+         views.subscription_required, name='subscription_required'),
+    path('subscription-required/<slug:slug>/',
+         views.subscription_required, name='subscription_required'),
+
 ]

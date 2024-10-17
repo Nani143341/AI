@@ -1,5 +1,6 @@
 # myapp/models.py
 
+import re
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -54,9 +55,11 @@ class UserProfile(models.Model):
 
     def is_premium(self):
         """Check if the user has an active premium subscription."""
-        if self.subscription_status and self.subscription_end_date:
-            return self.subscription_end_date >= timezone.now().date()
-        return False
+        if not self.subscription_status:
+            return False
+
+        today = timezone.now().date()  # Convert to date for comparison
+        return self.subscription_start_date <= today <= self.subscription_end_date
 
     def is_subscription_active(self):
         return self.is_premium and self.subscription_end_date > timezone.now()
@@ -97,6 +100,12 @@ class Course(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+    def get_video_id(self):
+        # Regex to extract YouTube video ID from various URL formats
+        pattern = r'(?:https?://)?(?:www\.)?(?:youtube\.com/(?:[^/]+/.+|(?:v|e(?:mbed)?)|.*[?&]v=)|youtu\.be/)([^&]{11})'
+        match = re.search(pattern, self.video_url)
+        return match.group(1) if match else None
 
     def __str__(self):
         return self.title

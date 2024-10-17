@@ -1,17 +1,25 @@
 import pdb
+import re
+from datetime import timedelta
 
+import requests
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.db import models
 from django.db.models import Avg, Count, Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import (get_object_or_404, redirect,  # Import redirect
                               render)
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 from django.views.generic import DetailView, ListView, TemplateView
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 from .forms import (ArticleForm, BlogPostForm, CourseForm, ForumCommentForm,
                     ForumThreadForm, QuizForm, UserRegistrationForm)
@@ -63,6 +71,37 @@ def premium_dashboard(request):
     courses = Course.objects.filter(is_premium=True)
     user_progress = request.user.get_course_progress()
     return render(request, 'premium_dashboard.html', {'courses': courses, 'progress': user_progress})
+
+
+# youtube_service.py
+
+YOUTUBE_API_SERVICE_NAME = 'youtube'
+YOUTUBE_API_VERSION = 'v3'
+
+
+def search_educational_videos(query):
+    try:
+        youtube = build(
+            YOUTUBE_API_SERVICE_NAME,
+            YOUTUBE_API_VERSION,
+            developerKey=settings.YOUTUBE_API_KEY
+        )
+        request = youtube.search().list(
+            q=query + ' tutorial',  # Add additional keywords to narrow down the search
+            part='snippet',
+            type='video',
+            maxResults=5,
+            videoCategoryId='27',
+            safeSearch='strict'
+        )
+        response = request.execute()
+        return [item['id']['videoId'] for item in response.get('items', [])]
+
+    except HttpError as e:
+        error_reason = e.content.decode("utf-8")
+        print(f"YouTube API Error: {error_reason}")
+        # Handle the error as needed, e.g., log it or return an empty list
+        return []
 
 
 # Redirect to the login page if not authenticated
@@ -299,11 +338,26 @@ def home(request):
 
 @login_required
 def upgrade_to_premium(request):
-    """View for the 'Upgrade to Premium' page."""
+    """View for upgrading a user to a premium subscription."""
     user_profile = UserProfile.objects.get(user=request.user)
 
-    if user_profile.is_premium():
-        return redirect('blog:home')  # Or any other relevant URL
+    if request.method == 'POST':
+        # Assume there's a valid payment or other verification process
+        # Here, we directly update the subscription status
+        user_profile.subscription_status = True
+        user_profile.subscription_start_date = timezone.now().date()
+        user_profile.subscription_end_date = timezone.now(
+        ).date() + timedelta(days=365)  # 1-year subscription
+        user_profile.save()
+        # Retrieve the course title from session and redirect back to the course
+        course_title = request.session.get('course_title', None)
+        if course_title:
+            # Convert the course title back to slug format and redirect
+            course_slug = course_title.replace(' ', '-')
+            return redirect('blog:course_detail', slug=course_slug)
+
+        # If no course was found in the session, redirect to the home page or course list
+        return redirect('blog:home')
 
     return render(request, 'upgrade_to_premium.html')
 
@@ -465,14 +519,70 @@ def course_list(request):
     return render(request, 'course_list.html', {'courses': courses})
 
 
+def subscription_required(request):
+    # Get the course title from the session
+    course_title = request.session.get('course_title', None)
+
+    if not course_title:
+        # Handle case where course_title is missing
+        return redirect('blog:course_list')  # or some error page
+
+    # Retrieve the course using the title
+    course = get_object_or_404(Course, title__iexact=course_title)
+
+    # Render the explanation page with the course details
+    return render(request, 'subscription_required.html', {'course': course, 'course_title': course_title})
+
+
+# youtube_service.py
+
+YOUTUBE_API_SERVICE_NAME = 'youtube'
+YOUTUBE_API_VERSION = 'v3'
+
+
+def search_educational_videos(query):
+    try:
+        youtube = build(
+            YOUTUBE_API_SERVICE_NAME,
+            YOUTUBE_API_VERSION,
+            developerKey=settings.YOUTUBE_API_KEY
+        )
+        request = youtube.search().list(
+            q=query + ' tutorial',  # Add additional keywords to narrow down the search
+            part='snippet',
+            type='video',
+            maxResults=5,
+            videoCategoryId='27',
+            safeSearch='strict'
+        )
+        response = request.execute()
+        return [item['id']['videoId'] for item in response.get('items', [])]
+
+    except HttpError as e:
+        error_reason = e.content.decode("utf-8")
+        print(f"YouTube API Error: {error_reason}")
+        # Handle the error as needed, e.g., log it or return an empty list
+        return []
+
+
 @login_required
 @login_required
 def course_detail(request, slug):
-    course = get_object_or_404(Course, slug=slug)
+    # Replace hyphens with spaces to get the title from the slug
+    course_title = slug.replace('-', ' ')
+
+    # Retrieve the course using the title instead of the slug
+    course = get_object_or_404(Course, title__iexact=course_title)
+
+    try:
+        user_profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        return redirect('create_profile')
 
     # Check if the user needs a premium subscription to access the course
-    if course.is_premium and not request.user.userprofile.is_premium():
-        return redirect('subscription_required')
+    if course.is_premium and not user_profile.subscription_status:
+        request.session['course_title'] = course_title
+        return redirect('blog:subscription_required')
 
     # Get or create the user's progress for this course
     progress, progress_created = UserCourseProgress.objects.get_or_create(
@@ -482,20 +592,23 @@ def course_detail(request, slug):
     # Initialize a flag to indicate enrollment
     is_enrolled = False
 
+    # Fetch the first YouTube video based on the course title
+    video_ids = search_educational_videos(course.title)
+
+    # Check if a video was found
+    first_video_id = video_ids[0] if video_ids else None
+
     if request.method == 'POST':
         if 'enroll' in request.POST:
-            # Handle enrollment
             enrollment, created = UserCourseEnrollment.objects.get_or_create(
                 user=request.user,
                 course=course
             )
             if created:
-                # Enrollment was successful; initialize progress tracking
                 progress.progress = 0  # Set initial progress
                 progress.save()
                 is_enrolled = True  # Set the flag to True
         elif 'start_quiz' in request.POST:
-            # Redirect to the quiz page
             quiz = get_object_or_404(Quiz, course=course)
             return redirect('quiz', quiz_id=quiz.id)
 
@@ -506,13 +619,26 @@ def course_detail(request, slug):
     # Retrieve the first quiz for the course (if available)
     quiz = Quiz.objects.filter(course=course).first()
 
-    # Render the course detail template with enrollment status and progress
+    # Render the course detail template with enrollment status, progress, and video
     return render(request, 'course_detail.html', {
         'course': course,
         'progress': progress,
         'is_enrolled': is_enrolled,
-        'quiz': quiz,  # Pass the quiz to the template
+        'quiz': quiz,
+        'first_video_id': first_video_id,  # Pass the first video ID to the template
     })
+
+
+def fetch_video_details(video_id):
+    """Fetch video details from YouTube API."""
+    api_key = settings.YOUTUBE_API_KEY
+    url = f"https://www.googleapis.com/youtube/v3/videos?id={video_id}&key={api_key}&part=snippet,contentDetails"
+
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None  # Handle error or return a default value
 
 
 @login_required
@@ -574,7 +700,3 @@ def leaderboard(request):
 def subscription_management(request):
     # Implement subscription management logic here (e.g., using Stripe)
     return render(request, 'subscription_management.html')
-
-
-def subscription_required(request):
-    return render(request, 'subscription_required.html')
