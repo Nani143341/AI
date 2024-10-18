@@ -26,6 +26,10 @@ app_name = 'blog'  # Add this line to specify the app namespace
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', views.hello, name='hello'),
+    path('course/<slug:course_slug>/quiz/<int:quiz_id>/',
+         views.quiz_detail_view, name='quiz_detail'),
+    path('question/<int:question_id>/',
+         views.question_detail, name='question_detail'),
     path('', views.home, name='home'),
     path('premium/', views.premium_dashboard, name='premium_dashboard'),
     path('accounts/profile/', views.user_profile, name='user_profile'),

@@ -3,6 +3,7 @@ import re
 from datetime import timedelta
 
 import requests
+from django import template
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -479,21 +480,72 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
+def quiz_detail(request, quiz_id):
+    quiz = Quiz.objects.get(id=quiz_id)
+    questions = quiz.questions.all()
+    context = {'quiz': quiz, 'questions': questions}
+    return render(request, 'quiz_detail.html', context)
+
+
+def quiz_detail_view(request, course_slug, quiz_id):
+    course = get_object_or_404(Course, slug=course_slug)
+    quiz = get_object_or_404(Quiz, id=quiz_id, course=course)
+    questions = quiz.questions.all()
+
+    context = {
+        'course': course,
+        'quiz': quiz,
+        'questions': questions,
+    }
+    return render(request, 'quiz_detail.html', context)
+
+
+def question_detail(request, question_id):
+    question = Question.objects.get(id=question_id)
+    answers = question.answers.all()
+    context = {'question': question, 'answers': answers}
+    return render(request, 'question_detail.html', context)
+
+
+@login_required
 def quiz_view(request, quiz_id):
+    # Fetch the quiz or return a 404 if not found
     quiz = get_object_or_404(Quiz, id=quiz_id)
 
+    # Fetch all related questions with their answers
+    questions = quiz.questions.prefetch_related('answers')
+
     if request.method == 'POST':
-        # Handle quiz submission
         score = 0
-        for question in quiz.questions.all():  # Using the related_name
+        user_answers = {}  # Store user's answers for display
+        correct_answers = {}  # Store correct answers for display
+
+        for question in questions:
+            # Get the user's selected answer
             user_answer = request.POST.get(str(question.id))
-            if user_answer == question.correct_answer:  # Assuming a correct_answer field exists
-                score += 1
+            user_answers[question.id] = user_answer
 
-        # Save the score or handle it as needed
-        return render(request, 'quiz_result.html', {'quiz': quiz, 'score': score})
+            # Check if the answer exists and is correct
+            if user_answer and question.answers.filter(id=user_answer, is_correct=True).exists():
+                score += 1  # Increment score for correct answers
 
-    questions = quiz.questions.all()  # Access the questions through related_name
+            # Store the correct answers for display
+            correct_answers[question.id] = question.answers.filter(
+                is_correct=True).values_list('text', flat=True)
+
+        # Calculate total number of questions
+        total_questions = questions.count()  # Total number of questions
+
+        # Render the result page with the score and correct answers
+        return render(request, 'quiz_result.html', {
+            'quiz': quiz,
+            'score': score,
+            'total_questions': total_questions,  # Pass total questions to the template
+            'user_answers': user_answers,
+            'correct_answers': correct_answers,
+        })
+
+    # Render the quiz page with questions and their answer options
     return render(request, 'quiz.html', {'quiz': quiz, 'questions': questions})
 
 
@@ -585,7 +637,6 @@ def search_educational_videos(query):
 
 
 @login_required
-@login_required
 def course_detail(request, slug):
     # Replace hyphens with spaces to get the title from the slug
     course_title = slug.replace('-', ' ')
@@ -596,10 +647,10 @@ def course_detail(request, slug):
     try:
         user_profile = request.user.userprofile
     except UserProfile.DoesNotExist:
-        return redirect('create_profile')
+        return HttpResponse("Error: no user profile")
 
     # Check if the user needs a premium subscription to access the course
-    if course.is_premium and not user_profile.subscription_status:
+    if course.is_premium and not user_profile.has_premium_access():
         request.session['course_title'] = course_title
         return redirect('blog:subscription_required')
 
@@ -607,9 +658,6 @@ def course_detail(request, slug):
     progress, progress_created = UserCourseProgress.objects.get_or_create(
         user=request.user, course=course
     )
-
-    # Initialize a flag to indicate enrollment
-    is_enrolled = False
 
     # Fetch the first YouTube video based on the course title
     video_ids = search_educational_videos(course.title)
@@ -626,7 +674,7 @@ def course_detail(request, slug):
             if created:
                 progress.progress = 0  # Set initial progress
                 progress.save()
-                is_enrolled = True  # Set the flag to True
+
         elif 'start_quiz' in request.POST:
             quiz_id = request.POST.get('quiz_id')
             if quiz_id:
@@ -636,15 +684,15 @@ def course_detail(request, slug):
     is_enrolled = UserCourseEnrollment.objects.filter(
         user=request.user, course=course).exists()
 
-    # Retrieve the first quiz for the course (if available)
-    quiz = Quiz.objects.filter(course=course).first()
+    # Retrieve all quizzes for the course
+    quizzes = Quiz.objects.filter(course=course)
 
-    # Render the course detail template with enrollment status, progress, and video
+    # Render the course detail template with quizzes
     return render(request, 'course_detail.html', {
         'course': course,
         'progress': progress,
         'is_enrolled': is_enrolled,
-        'quiz': quiz,
+        'quizzes': quizzes,
         'first_video_id': first_video_id,  # Pass the first video ID to the template
     })
 

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto mt-10">
+    <h1 class="text-3xl font-bold mb-6">{{ quiz.title }} - Results</h1>
+    
+    <h2 class="text-xl font-semibold">Your Total Score: {{ score }} out of {{ total_questions }}</h2>
+
+    <div class="mt-6 flex space-x-4">
+        <a href="{% url 'blog:quiz' quiz.id %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            Retake Quiz
+        </a>
+        <a href="{% url 'blog:course_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+            Back to Course
+        </a>
+    </div>
+</div>
+{% endblock content %}

@@ -1,69 +1,71 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container mt-5">
+<div class="container mt-5">
     <!-- Course Information -->
     <h1>{{ course.title }}</h1>
     <p>{{ course.description }}</p>
     <h4>Difficulty: {{ course.get_difficulty_display }}</h4>
 
     {% if course.is_premium %}
-      <span class="badge badge-warning">Premium</span>
+    <span class="badge badge-warning">Premium</span>
     {% endif %}
 
     {% if first_video_id %}
-      <iframe width="800" height="450" src="https://www.youtube.com/embed/{{ first_video_id }}" frameborder="0" allowfullscreen></iframe>
+    <iframe width="800" height="450" src="https://www.youtube.com/embed/{{ first_video_id }}" frameborder="0" allowfullscreen></iframe>
     {% else %}
-      <p>No video found for this course.</p>
+    <p>No video found for this course.</p>
     {% endif %}
 
     {% if is_enrolled %}
-      <div class="alert alert-success mt-4">
+    <div class="alert alert-success mt-4">
         You have successfully enrolled in this course!
-      </div>
+    </div>
 
-      <!-- Course Progress Tracking -->
-      <div class="progress mt-4">
+    <!-- Course Progress Tracking -->
+    <div class="progress mt-4">
         <div class="progress-bar" role="progressbar" style="width: {{ progress.progress }}%;" aria-valuenow="{{ progress.progress }}" aria-valuemin="0" aria-valuemax="100">
-          {{ progress.progress }}% Completed
+            {{ progress.progress }}% Completed
         </div>
-      </div>
+    </div>
 
-      <!-- Update Progress -->
-      <form method="POST" class="mt-4">
+    <!-- Update Progress -->
+    <form method="POST" class="mt-4">
         {% csrf_token %}
         <input type="hidden" name="update_progress" value="1">
         <button type="submit" class="btn btn-success">Mark Next Lesson as Completed</button>
-      </form>
+    </form>
 
-      <!-- Quiz Section -->
-{% if quiz %}
-    <form method="POST" class="mt-4">
+    <!-- Quiz Section -->
+    {% if quizzes %}
+    <h3 class="mt-4">Available Quizzes</h3>
+    {% for quiz in quizzes %}
+    <form method="POST" class="mt-2">
         {% csrf_token %}
         <input type="hidden" name="start_quiz" value="1">
-        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">  <!-- Add this line -->
+        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
         <button type="submit" class="btn btn-primary">Start Quiz: {{ quiz.title }}</button>
     </form>
-{% else %}
-    <p>No quiz available for this course.</p>
-{% endif %}
-
+    {% endfor %}
+    {% else %}
+    <p>No quizzes available for this course.</p>
+    {% endif %}
 
     {% else %}
-      <!-- Enrollment Form -->
-      <form method="POST" class="mt-4">
+    <!-- Enrollment Form -->
+    <form method="POST" class="mt-4">
         {% csrf_token %}
         <input type="hidden" name="enroll" value="1">
         <button type="submit" class="btn btn-primary">Enroll in Course</button>
-      </form>
-    {% endif %} <!-- Closing for is_enrolled -->
+    </form>
+    {% endif %}
 
     <!-- User Profile Information -->
     <div class="mt-5">
-      <h3>Your Profile</h3>
-      <p>Username: {{ request.user.username }}</p>
-      <p>Email: {{ request.user.email }}</p>
-      <p>Premium Status: {% if request.user.userprofile.subscription_status %} Yes {% else %} No {% endif %}</p>
+        <h3>Your Profile</h3>
+        <p>Username: {{ request.user.username }}</p>
+        <p>Email: {{ request.user.email }}</p>
+        <p>Premium Status: {% if request.user.userprofile.subscription_status %} Yes {% else %} No {% endif %}</p>
     </div>
-  </div>
+</div>
 {% endblock %}

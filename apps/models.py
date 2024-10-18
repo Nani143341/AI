@@ -54,13 +54,9 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"
 
-    def is_premium(self):
-        """Check if the user has an active premium subscription."""
-        if not self.subscription_status:
-            return False
-
-        today = timezone.now().date()  # Convert to date for comparison
-        return self.subscription_start_date <= today <= self.subscription_end_date
+    def has_premium_access(self):
+        """Check if the user has premium access based solely on subscription status."""
+        return self.subscription_status  # True if user has an active premium subscription
 
     def is_subscription_active(self):
         return self.is_premium and self.subscription_end_date > timezone.now()
@@ -146,13 +142,17 @@ class Question(models.Model):
     text = models.TextField()
 
     def __str__(self):
-        return self.text
+        return f"Question for {self.quiz.title}: {self.text}"
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name='answers')
     text = models.CharField(max_length=200)
     is_correct = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Answer to '{self.question.text}': {self.text} (Correct: {self.is_correct})"
 
 
 class UserQuizResult(models.Model):
