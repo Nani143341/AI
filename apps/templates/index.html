@@ -6,8 +6,19 @@
     <div class="text-center">
       <h1 class="display-4 mb-3">Welcome to AI Learning Hub</h1>
       <p class="lead">Your gateway to AI education and cutting-edge technology insights</p>
-      <a href="{% url 'blog:course_list' %}" class="btn btn-primary btn-lg">Explore Courses</a>
     </div>
+  </div>
+
+  <!-- Search Bar Section -->
+  <div class="container mt-4">
+    <form method="GET" action="{% url 'blog:course_search' %}">
+      <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Search for courses..." aria-label="Search for courses" required>
+        <div class="input-group-append">
+          <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+      </div>
+    </form>
   </div>
 
   <!-- Premium Courses Section -->
@@ -65,51 +76,5 @@
       </div>
     </div>
   </div>
-
-  <!-- Community Features Section -->
-  <div class="container mt-5">
-    <h2 class="mb-4">Community Features</h2>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="card mb-4">
-          <div class="card-body">
-            <h5 class="card-title">Discussion Forums</h5>
-            <p class="card-text">Join the conversation and discuss AI topics with fellow learners.</p>
-            <a href="{% url 'blog:forum_list' %}" class="btn btn-primary">Visit Forums</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card mb-4">
-          <div class="card-body">
-            <h5 class="card-title">Leaderboard</h5>
-            <p class="card-text">See how you rank among other learners in our community.</p>
-            <a href="{% url 'blog:leaderboard' %}" class="btn btn-primary">View Leaderboard</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Embedded YouTube Videos Section -->
-  <div class="container mt-5">
-    <h2 class="mb-4">Trending News & Courses Videos</h2>
-    <div class="row">
-      <div class="col-md-6">
-        <h3>Trending News</h3>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/gqUQbjsYZLQ" frameborder="0" allowfullscreen></iframe>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/Ih-SoOrvl4Q" frameborder="0" allowfullscreen></iframe>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/mKYbEk-kAsA" frameborder="0" allowfullscreen></iframe>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/SMnBnGQqlR4" frameborder="0" allowfullscreen></iframe>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/spsG4G2sbrw" frameborder="0" allowfullscreen></iframe>
-      </div>
-      <div class="col-md-6">
-        <h3>Popular Courses</h3>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/ad79nYk2keg" frameborder="0" allowfullscreen></iframe>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/gZmobeGL0Yg" frameborder="0" allowfullscreen></iframe>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/Gv9_4yMHFhI" frameborder="0" allowfullscreen></iframe>
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/E0Hmnixke2g" frameborder="0" allowfullscreen></iframe>
-      </div>
-    </div>
-  </div>
+  
 {% endblock content %}

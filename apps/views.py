@@ -1,3 +1,4 @@
+
 import pdb
 import re
 from datetime import timedelta
@@ -18,16 +19,18 @@ from django.shortcuts import (get_object_or_404, redirect,  # Import redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
+from django.views import View
 from django.views.generic import DetailView, ListView, TemplateView
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from .forms import (ArticleForm, BlogPostForm, CourseForm, ForumCommentForm,
                     ForumThreadForm, QuizForm, UserRegistrationForm)
-from .models import (Article, BlogPost, Course,  # Import your models
-                     ForumComment, ForumThread, Post, Question, Quiz, Tag,
-                     UserBadge, UserCourseEnrollment, UserCourseProgress,
-                     UserProfile, UserQuizResult)
+from .models import Course  # Import your Course model
+from .models import (Article, BlogPost, ForumComment,  # Import your models
+                     ForumThread, Post, Question, Quiz, Tag, UserBadge,
+                     UserCourseEnrollment, UserCourseProgress, UserProfile,
+                     UserQuizResult)
 
 
 @login_required
@@ -46,7 +49,6 @@ def edit_blog_post(request, pk):
     return render(request, 'edit_blog_post.html', {'form': form, 'post': post})
 
 
-@login_required
 def loginPage(request):
     if request.user.is_authenticated:
         return redirect('/')
@@ -57,10 +59,17 @@ def loginPage(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                if user.profile.is_premium:  # Assuming profile stores user role
-                    return redirect('blog:premium_dashboard')
+                # Check if user has a profile
+                if hasattr(user, 'profile'):
+                    if user.profile.is_premium:  # Assuming profile stores user role
+                        return redirect('blog:premium_dashboard')
+                    else:
+                        return redirect('blog:home')
                 else:
-                    redirect('blog:home')
+                    messages.info(
+                        request, 'Your profile does not exist. Please create a profile to access the dashboard.')
+                    # Redirect to a profile creation page or another appropriate view
+                    return redirect('blog:profile_creation')
             else:
                 messages.info(request, 'Incorrect Username or Password')
         context = {}
@@ -105,6 +114,15 @@ def search_educational_videos(query):
         # Handle the error as needed, e.g., log it or return an empty list
         return []
 
+# In your view
+
+
+def recommended_courses(request):
+    user_profile = request.user.userprofile
+    recommended_courses = Course.objects.filter(
+        interests__in=user_profile.interests.all()).distinct()
+    return render(request, 'courses/recommended_courses.html', {'courses': recommended_courses})
+
 
 # Redirect to the login page if not authenticated
 @login_required
@@ -117,17 +135,25 @@ def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+
+            # Create user profile
+            profile = UserProfile.objects.create(user=user)
+
+            # Assign interests
+            interests = form.cleaned_data.get('interests')
+            if interests:
+                profile.interests.set(interests)
+
+            profile.save()
             login(request, user)
-            messages.success(
-                request, 'Registration successful! Welcome to the platform.')
-            # Redirect to a home page or dashboard after registration
             return redirect('blog:home')
-        else:
-            messages.error(request, 'Please correct the errors below.')
     else:
         form = UserRegistrationForm()
-    return render(request, 'register.html', {'form': form})
+
+    return render(request, 'registration/register.html', {'form': form})
 
 
 class BlogPostListView(ListView):
@@ -253,6 +279,67 @@ class IndexView(TemplateView):
 
 
 @login_required
+def update_progress(request, course_id):
+    # Fetch the course based on ID
+    course = get_object_or_404(Course, id=course_id)
+
+    if request.method == 'POST':
+        # Get or create course progress for the current user
+        course_progress, created = UserCourseProgress.objects.get_or_create(
+            course=course, user=request.user
+        )
+
+        # Update the progress, ensuring it does not exceed 100%
+        course_progress.progress += 25
+        if course_progress.progress > 100:
+            course_progress.progress = 100  # Cap progress at 100
+
+        # Check if progress is now 100%
+        if course_progress.progress == 100:
+            # Mark the course as completed
+            course_progress.completed = True
+            course_progress.save()
+
+            # Update the leaderboard
+            update_leaderboard(request.user, course)
+
+        # Save the progress
+        course_progress.save()
+
+        # Redirect to the course detail page with the updated progress
+        return redirect('blog:course_detail', slug=course.slug)
+
+    return redirect('blog:course_detail', slug=course.slug)
+
+
+def update_leaderboard(user, course):
+    # Define how many points to award for completing a course
+    points_awarded = 10  # Example points for completing a course
+
+    # Fetch the user's profile
+    user_profile = user.userprofile
+
+    # Update points
+    user_profile.points += points_awarded
+    user_profile.save()
+
+
+@login_required
+def leaderboard_view(request):
+    # Annotate user profiles with average quiz scores and completed courses
+    top_users = UserProfile.objects.annotate(
+        # Average score from quiz results
+        avg_score=Avg('userquizresult__score'),
+        course_count=Count('usercourseprogress', filter=models.Q(
+            usercourseprogress__progress=100))  # Count of completed courses
+    ).order_by('-avg_score', '-course_count')[:10]  # Get top 10 users
+
+    return render(request, 'leaderboard.html', {
+        'top_users': top_users
+    })
+
+
+@login_required
 def home(request):
     # Replace with the logic to get featured courses
     courses = Course.objects.all()
@@ -336,6 +423,12 @@ def home(request):
 
 
 # views.py
+@login_required
+def upgrade_success(request):
+    """View for displaying the user's profile after a successful upgrade."""
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    return render(request, 'upgrade_success.html', {'user_profile': user_profile})
 
 
 @login_required
@@ -359,7 +452,7 @@ def upgrade_to_premium(request):
             return redirect('blog:course_detail', slug=course_slug)
 
         # If no course was found in the session, redirect to the home page or course list
-        return redirect('blog:home')
+        return redirect('blog:upgrade_success')
 
     return render(request, 'upgrade_to_premium.html')
 
@@ -466,20 +559,6 @@ def user_profile(request):
     return render(request, 'index.html', context)
 
 
-def register(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            # Use get_or_create to avoid duplicates
-            UserProfile.objects.get_or_create(user=user)
-            login(request, user)
-            return redirect('blog:home')
-    else:
-        form = UserRegistrationForm()
-    return render(request, 'register.html', {'form': form})
-
-
 def quiz_detail(request, quiz_id):
     quiz = Quiz.objects.get(id=quiz_id)
     questions = quiz.questions.all()
@@ -518,35 +597,55 @@ def quiz_view(request, quiz_id):
     if request.method == 'POST':
         score = 0
         user_answers = {}  # Store user's answers for display
-        correct_answers = {}  # Store correct answers for display
+        failed_questions = []  # Store questions the user got wrong
 
         for question in questions:
             # Get the user's selected answer
             user_answer = request.POST.get(str(question.id))
             user_answers[question.id] = user_answer
 
-            # Check if the answer exists and is correct
-            if user_answer and question.answers.filter(id=user_answer, is_correct=True).exists():
-                score += 1  # Increment score for correct answers
+            # Collect correct answer texts
+            correct_answer_texts = [
+                answer.text for answer in question.answers.all() if answer.is_correct]
 
-            # Store the correct answers for display
-            correct_answers[question.id] = question.answers.filter(
-                is_correct=True).values_list('text', flat=True)
+            # Check if the user's answer is correct
+            if user_answer and str(user_answer) in [str(answer.id) for answer in question.answers.all() if answer.is_correct]:
+                score += 1  # Increment score for correct answers
+            else:
+                failed_questions.append({
+                    'question': question.text,
+                    'user_answer': user_answer,
+                    'correct_answers': correct_answer_texts
+                })
 
         # Calculate total number of questions
         total_questions = questions.count()  # Total number of questions
 
-        # Render the result page with the score and correct answers
+        # Save the quiz result for the user
+        UserQuizResult.objects.update_or_create(
+            user=request.user,
+            quiz=quiz,
+            defaults={'score': score}
+        )
+
+        # Prepare results
+        results = {
+            'score': score,
+            'total_questions': total_questions,
+            'user_answers': user_answers,
+            'failed_questions': failed_questions,
+        }
+
+        # Render the result page with the score and results
         return render(request, 'quiz_result.html', {
             'quiz': quiz,
-            'score': score,
-            'total_questions': total_questions,  # Pass total questions to the template
-            'user_answers': user_answers,
-            'correct_answers': correct_answers,
+            'results': results,  # Pass the results to the template
         })
 
     # Render the quiz page with questions and their answer options
     return render(request, 'quiz.html', {'quiz': quiz, 'questions': questions})
+
+
 
 
 @login_required
@@ -579,15 +678,14 @@ def article_detail(request, article_id):
 
 
 def course_list(request):
-    courses = Course.objects.all()
-    # Check if user is authenticated and has a UserProfile
-    if not request.user.is_authenticated or not hasattr(request.user, 'userprofile'):
-        courses = courses.filter(is_premium=False)
-    else:
-        # Check if user is premium
-        if not request.user.userprofile.is_premium:
-            courses = courses.filter(is_premium=False)
-    return render(request, 'course_list.html', {'courses': courses})
+    # Retrieve all courses
+    premium_courses = Course.objects.filter(is_premium=True)
+    regular_courses = Course.objects.filter(is_premium=False)
+
+    return render(request, 'course_list.html', {
+        'premium_courses': premium_courses,
+        'regular_courses': regular_courses,
+    })
 
 
 def subscription_required(request):
@@ -638,10 +736,7 @@ def search_educational_videos(query):
 
 @login_required
 def course_detail(request, slug):
-    # Replace hyphens with spaces to get the title from the slug
     course_title = slug.replace('-', ' ')
-
-    # Retrieve the course using the title instead of the slug
     course = get_object_or_404(Course, title__iexact=course_title)
 
     try:
@@ -649,52 +744,68 @@ def course_detail(request, slug):
     except UserProfile.DoesNotExist:
         return HttpResponse("Error: no user profile")
 
-    # Check if the user needs a premium subscription to access the course
     if course.is_premium and not user_profile.has_premium_access():
         request.session['course_title'] = course_title
         return redirect('blog:subscription_required')
 
-    # Get or create the user's progress for this course
     progress, progress_created = UserCourseProgress.objects.get_or_create(
         user=request.user, course=course
     )
 
-    # Fetch the first YouTube video based on the course title
     video_ids = search_educational_videos(course.title)
-
-    # Check if a video was found
     first_video_id = video_ids[0] if video_ids else None
 
     if request.method == 'POST':
         if 'enroll' in request.POST:
-            enrollment, created = UserCourseEnrollment.objects.get_or_create(
+            UserCourseEnrollment.objects.get_or_create(
                 user=request.user,
                 course=course
             )
-            if created:
-                progress.progress = 0  # Set initial progress
-                progress.save()
+            progress.progress = 0
+            progress.save()
 
         elif 'start_quiz' in request.POST:
             quiz_id = request.POST.get('quiz_id')
             if quiz_id:
                 return redirect('blog:quiz', quiz_id=quiz_id)
 
-    # Check if the user is already enrolled
     is_enrolled = UserCourseEnrollment.objects.filter(
         user=request.user, course=course).exists()
 
-    # Retrieve all quizzes for the course
     quizzes = Quiz.objects.filter(course=course)
 
-    # Render the course detail template with quizzes
+    # Retrieve quiz results for the current user
+    quiz_results = UserQuizResult.objects.filter(
+        user=request.user, quiz__in=quizzes)
+
     return render(request, 'course_detail.html', {
         'course': course,
         'progress': progress,
         'is_enrolled': is_enrolled,
         'quizzes': quizzes,
-        'first_video_id': first_video_id,  # Pass the first video ID to the template
+        'first_video_id': first_video_id,
+        'quiz_results': quiz_results,  # Pass the quiz results to the template
     })
+
+
+# views.py
+
+
+class CourseSearchView(View):
+    def get(self, request):
+        query = request.GET.get('q', '')
+        if query:
+            # Filter courses based on the search query
+            courses = Course.objects.filter(
+                title__icontains=query)  # Adjust as needed
+        else:
+            courses = Course.objects.none()  # No courses found if no query
+
+        context = {
+            'courses': courses,
+            'query': query,
+        }
+        return render(request, 'course_search_results.html', context)
 
 
 def fetch_video_details(video_id):

@@ -11,8 +11,6 @@
 </head>
 <body>
 
-
-
     <!-- Leaderboard Content -->
     <div class="container mt-4">
         <h1 class="text-center">Leaderboard</h1>
@@ -29,7 +27,7 @@
                 {% for user in top_users %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ user.user.username }}</td> <!-- Adjust this according to your UserProfile model -->
+                    <td>{{ user.user.username }}</td>
                     <td>{{ user.avg_score|floatformat:2 }}</td> <!-- Format the score to two decimal places -->
                     <td>{{ user.course_count }}</td>
                 </tr>
@@ -41,7 +39,6 @@
             </tbody>
         </table>
     </div>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

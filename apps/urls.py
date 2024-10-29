@@ -19,12 +19,14 @@ from django.urls import path
 
 from . import views
 from .views import IndexView  # Import IndexView here
+from .views import CourseSearchView
 
 app_name = 'blog'  # Add this line to specify the app namespace
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('upgrade_success/', views.upgrade_success, name='upgrade_success'),
     path('hello/', views.hello, name='hello'),
     path('course/<slug:course_slug>/quiz/<int:quiz_id>/',
          views.quiz_detail_view, name='quiz_detail'),
@@ -33,6 +35,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('premium/', views.premium_dashboard, name='premium_dashboard'),
     path('accounts/profile/', views.user_profile, name='user_profile'),
+    path('accounts/login/', views.loginPage, name='login_'),
     path('login/', views.loginPage, name='login'),
     path('logout/', views.logoutUser, name='logout'),
     path('register/', views.register, name='register'),
@@ -58,5 +61,10 @@ urlpatterns = [
     path('subscription-required/<slug:slug>/',
          views.subscription_required, name='subscription_required'),
     path('quiz/<int:quiz_id>/', views.quiz_view, name='quiz'),
+    path('courses/search/', CourseSearchView.as_view(), name='course_search'),
+    path('update-progress/<int:course_id>/',
+         views.update_progress, name='update_progress'),
+    # Ensure you have the course detail view
+    path('course/<slug:slug>/', views.course_detail, name='course_detail'),
 
 ]

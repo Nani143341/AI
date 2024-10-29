@@ -35,6 +35,13 @@ class Tag(models.Model):
         return self.name
 
 
+class Interest(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_premium = models.BooleanField(default=False)
@@ -50,13 +57,15 @@ class UserProfile(models.Model):
         max_length=20, choices=ROLE_CHOICES, default='free')
     subscription_status = models.BooleanField(default=False)
     subscription_start_date = models.DateField(null=True, blank=True)
+    interests = models.ManyToManyField(
+        Interest, related_name='user_profiles', blank=True)
+    points = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"
 
     def has_premium_access(self):
-        """Check if the user has premium access based solely on subscription status."""
-        return self.subscription_status  # True if user has an active premium subscription
+        return self.subscription_status
 
     def is_subscription_active(self):
         return self.is_premium and self.subscription_end_date > timezone.now()
@@ -87,11 +96,16 @@ class Course(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     video_url = models.URLField()
-    difficulty = models.CharField(max_length=20, choices=[(
-        'beginner', 'Beginner'), ('intermediate', 'Intermediate'), ('advanced', 'Advanced')])
+    difficulty = models.CharField(max_length=20, choices=[
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced')
+    ])
     is_premium = models.BooleanField(default=False)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     slug = models.SlugField(null=True, blank=True)
+    interests = models.ManyToManyField(
+        Interest, related_name='courses', blank=True)  # New field
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -112,6 +126,8 @@ class UserCourseProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     progress = models.IntegerField(default=0)  # Percentage of course completed
+    # New field to track completion
+    completed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username}'s progress in {self.course.title}"

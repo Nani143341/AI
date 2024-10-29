@@ -1,11 +1,10 @@
 # myapp/forms.py
 
-from .models import (Article, Course, ForumComment, ForumThread, Quiz,
-                     UserProfile)
-from django.contrib.auth.models import User
 from django import forms
+from django.contrib.auth.models import User
 
-from .models import BlogPost
+from .models import (Article, BlogPost, Course, ForumComment, ForumThread,
+                     Interest, Quiz, UserProfile)
 
 
 class MyForm(forms.ModelForm):
@@ -25,30 +24,38 @@ class BlogPostForm(forms.ModelForm):
         fields = ['title', 'content']
 
 
+# forms.py
+
+
 class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
-    password_confirm = forms.CharField(
-        widget=forms.PasswordInput, label='Confirm Password')
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
+    interests = forms.ModelMultipleChoiceField(
+        queryset=Interest.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'password',
+                  'confirm_password', 'email', 'interests']
 
-    def clean_password_confirm(self):
-        password = self.cleaned_data.get('password')
-        password_confirm = self.cleaned_data.get('password_confirm')
-        if password and password_confirm and password != password_confirm:
-            raise forms.ValidationError("Passwords do not match")
-        return password_confirm
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if not username[0].isalpha():
+            raise forms.ValidationError("Username must start with a letter.")
+        return username
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data['password'])
-        if commit:
-            user.save()
-            # Create a related UserProfile object for the new user.
-            UserProfile.objects.create(user=user)
-        return user
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', "Passwords do not match.")
+
+        return cleaned_data
 
 
 # Article Form
