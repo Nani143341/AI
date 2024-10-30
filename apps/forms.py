@@ -25,6 +25,23 @@ class BlogPostForm(forms.ModelForm):
 
 
 # forms.py
+# forms.py
+
+
+class ForumCommentForm(forms.ModelForm):
+    class Meta:
+        model = ForumComment
+        fields = ['content']
+
+
+class NewThreadForm(forms.ModelForm):
+    class Meta:
+        model = ForumThread
+        fields = ['title', 'content']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter thread title'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter thread content'}),
+        }
 
 
 class UserRegistrationForm(forms.ModelForm):
@@ -90,9 +107,3 @@ class ForumThreadForm(forms.ModelForm):
         fields = ['title', 'content']
 
 # Forum Comment Form
-
-
-class ForumCommentForm(forms.ModelForm):
-    class Meta:
-        model = ForumComment
-        fields = ['content']

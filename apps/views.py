@@ -25,12 +25,13 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from .forms import (ArticleForm, BlogPostForm, CourseForm, ForumCommentForm,
-                    ForumThreadForm, QuizForm, UserRegistrationForm)
+                    ForumThreadForm, NewThreadForm, QuizForm,
+                    UserRegistrationForm)
 from .models import Course  # Import your Course model
-from .models import (Article, BlogPost, ForumComment,  # Import your models
-                     ForumThread, Post, Question, Quiz, Tag, UserBadge,
-                     UserCourseEnrollment, UserCourseProgress, UserProfile,
-                     UserQuizResult)
+from .models import (  # Adjust based on your actual model names; Import your models
+    Article, BlogPost, ForumComment, ForumThread, Post, Question, Quiz, Tag,
+    UserBadge, UserCourseEnrollment, UserCourseProgress, UserProfile,
+    UserQuizResult)
 
 
 @login_required
@@ -646,6 +647,33 @@ def quiz_view(request, quiz_id):
     return render(request, 'quiz.html', {'quiz': quiz, 'questions': questions})
 
 
+def profile(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    # Fetch user profile and enrolled courses
+    user_profile = request.user.userprofile
+    enrolled_courses = UserCourseEnrollment.objects.filter(user=request.user)
+
+    return render(request, 'profile.html', {
+        'user_profile': user_profile,
+        'enrolled_courses': enrolled_courses
+    })
+
+
+def trending_videos(request):
+    # Example list of video IDs for trending news and courses
+    trending_news_videos = [
+        "gqUQbjsYZLQ", "Ih-SoOrvl4Q", "mKYbEk-kAsA", "SMnBnGQqlR4", "spsG4G2sbrw"
+    ]
+    popular_courses_videos = [
+        "ad79nYk2keg", "gZmobeGL0Yg", "Gv9_4yMHFhI", "E0Hmnixke2g"
+    ]
+    context = {
+        'trending_news_videos': trending_news_videos,
+        'popular_courses_videos': popular_courses_videos,
+    }
+    return render(request, 'trending_videos.html', context)
 
 
 @login_required
@@ -677,14 +705,20 @@ def article_detail(request, article_id):
     return render(request, 'article_detail.html', {'article': article})
 
 
+@login_required
 def course_list(request):
-    # Retrieve all courses
+    # Retrieve all premium and regular courses
     premium_courses = Course.objects.filter(is_premium=True)
     regular_courses = Course.objects.filter(is_premium=False)
+
+    # Retrieve the courses the user is enrolled in
+    enrolled_courses = UserCourseEnrollment.objects.filter(
+        user=request.user).select_related('course')
 
     return render(request, 'course_list.html', {
         'premium_courses': premium_courses,
         'regular_courses': regular_courses,
+        'enrolled_courses': enrolled_courses,
     })
 
 
@@ -829,15 +863,62 @@ def take_quiz(request, quiz_id):
     return render(request, 'take_quiz.html', {'quiz': quiz})
 
 
+# views.py
+
+
+def thread_detail(request, thread_id):
+    # Retrieve the forum thread or return a 404 error if not found
+    thread = get_object_or_404(ForumThread, id=thread_id)
+
+    if request.method == 'POST':
+        form = ForumCommentForm(request.POST)
+        if form.is_valid():
+            # Create a new comment instance but don't save yet
+            comment = form.save(commit=False)
+            comment.thread = thread  # Associate the comment with the thread
+            comment.author = request.user  # Set the author to the current user
+            comment.save()  # Save the comment to the database
+
+            # Redirect to the same thread detail page after saving the comment
+            # Adjust namespace if necessary
+            return redirect('blog:thread_detail', thread_id=thread.id)
+    else:
+        form = ForumCommentForm()  # Initialize an empty form for GET requests
+
+    # Retrieve all comments related to this thread
+    comments = thread.forumcomment_set.all()
+
+    # Render the template with the thread, comments, and form context
+    return render(request, 'thread_detail.html', {
+        'thread': thread,
+        'comments': comments,
+        'form': form,
+    })
+
+
 @login_required
 def forum_list(request):
+    # Annotate threads with the count of related comments
     threads = ForumThread.objects.annotate(comment_count=Count('forumcomment'))
-    return render(request, 'forum_list.html', {'threads': threads})
+
+    if request.method == 'POST':
+        form = NewThreadForm(request.POST)
+        if form.is_valid():
+            new_thread = form.save(commit=False)
+            new_thread.author = request.user
+            new_thread.save()
+            # Update this to match your URL pattern
+            return redirect('blog:forum_list')
+    else:
+        form = NewThreadForm()
+
+    return render(request, 'forum_list.html', {'threads': threads, 'form': form})
 
 
 @login_required
 def forum_thread(request, thread_id):
     thread = get_object_or_404(ForumThread, id=thread_id)
+    # Retrieve all comments related to the thread
     comments = thread.forumcomment_set.all()
     if request.method == 'POST':
         form = ForumCommentForm(request.POST)
@@ -846,7 +927,8 @@ def forum_thread(request, thread_id):
             comment.thread = thread
             comment.author = request.user
             comment.save()
-            return redirect('forum_thread', thread_id=thread.id)
+            # Redirect to the same thread
+            return redirect('blog:forum_thread', thread_id=thread.id)
     else:
         form = ForumCommentForm()
     return render(request, 'forum_thread.html', {'thread': thread, 'comments': comments, 'form': form})

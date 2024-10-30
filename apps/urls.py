@@ -40,6 +40,7 @@ urlpatterns = [
     path('logout/', views.logoutUser, name='logout'),
     path('register/', views.register, name='register'),
     path('index/', views.IndexView.as_view(), name='index'),
+    path('trending-videos/', views.trending_videos, name='trending_videos'),
     path('', IndexView.as_view(), name='home'),
     path('blog/', views.BlogPostListView.as_view(), name='blog_post_list'),
     path('blog/<int:pk>/', views.BlogPostDetailView.as_view(),
@@ -66,5 +67,7 @@ urlpatterns = [
          views.update_progress, name='update_progress'),
     # Ensure you have the course detail view
     path('course/<slug:slug>/', views.course_detail, name='course_detail'),
+    path('profile/', views.profile, name='profile'),
+    path('thread/<int:thread_id>/', views.thread_detail, name='thread_detail'),
 
 ]

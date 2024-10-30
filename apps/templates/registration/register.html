@@ -1,80 +1,226 @@
 {% extends 'base.html' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Register - AI Learning Hub{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="text-center mb-4">Create an Account</h2>
-            <div class="card shadow-sm p-4">
-                {% if form.errors %}
-                    <div class="alert alert-danger">
-                        <strong>There were errors in your submission:</strong>
-                        <ul class="mb-0">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4 p-md-5">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">Create Your Account</h2>
+                        <p class="text-muted">Join our community of AI enthusiasts</p>
+                    </div>
+
+                    <!-- Error Messages -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Please correct the following errors:</strong>
+                        <ul class="mb-0 mt-2">
                             {% for field, errors in form.errors.items %}
-                                <li>{{ field|capfirst }}: {{ errors|join:", " }}</li>
+                            <li>{{ field|capfirst }}: {{ errors|join:", " }}</li>
                             {% endfor %}
                         </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                {% endif %}
+                    {% endif %}
 
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    <div class="form-group mb-3">
-                        <label for="username">Username</label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="text-danger small">
+                    <!-- Registration Form -->
+                    <form method="post" novalidate class="needs-validation">
+                        {% csrf_token %}
+
+                        <!-- Username Field -->
+                        <div class="form-floating mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-user text-muted"></i>
+                                </span>
+                                {{ form.username }}
+                                <label for="{{ form.username.id_for_label }}">Username</label>
+                            </div>
+                            {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">
                                 {{ form.username.errors|join:", " }}
                             </div>
-                        {% endif %}
-                    </div>
+                            {% endif %}
+                        </div>
 
-                    <div class="form-group mb-3">
-                        <label for="email">Email</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger small">
+                        <!-- Email Field -->
+                        <div class="form-floating mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-envelope text-muted"></i>
+                                </span>
+                                {{ form.email }}
+                                <label for="{{ form.email.id_for_label }}">Email address</label>
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">
                                 {{ form.email.errors|join:", " }}
                             </div>
-                        {% endif %}
-                    </div>
+                            {% endif %}
+                        </div>
 
-                    <div class="form-group mb-3">
-                        <label for="password">Password</label>
-                        {{ form.password }}
-                        {% if form.password.errors %}
-                            <div class="text-danger small">
+                        <!-- Password Field -->
+                        <div class="form-floating mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
+                                {{ form.password }}
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="passwordStrength" class="progress mt-2" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">
                                 {{ form.password.errors|join:", " }}
                             </div>
-                        {% endif %}
-                    </div>
+                            {% endif %}
+                        </div>
 
-                    <div class="form-group mb-3">
-                        <label for="confirm_password">Confirm Password</label>
-                        {{ form.confirm_password }}
-                        {% if form.confirm_password.errors %}
-                            <div class="text-danger small">
+                        <!-- Confirm Password Field -->
+                        <div class="form-floating mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
+                                {{ form.confirm_password }}
+                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.confirm_password.errors %}
+                            <div class="invalid-feedback d-block">
                                 {{ form.confirm_password.errors|join:", " }}
                             </div>
-                        {% endif %}
-                    </div>
+                            {% endif %}
+                        </div>
 
-                    <div class="form-group mb-4">
-                        <label for="interests">Select Interests</label>
-                        {{ form.interests }}
-                        {% if form.interests.errors %}
-                            <div class="text-danger small">
+                        <!-- Interests Field -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-tags me-2"></i>Select Your Interests
+                            </label>
+                            <div class="interest-container border rounded p-3">
+                                {{ form.interests }}
+                            </div>
+                            {% if form.interests.errors %}
+                            <div class="invalid-feedback d-block">
                                 {{ form.interests.errors|join:", " }}
                             </div>
-                        {% endif %}
-                    </div>
+                            {% endif %}
+                        </div>
 
-                    <button type="submit" class="btn btn-primary btn-block">Register</button>
-                </form>
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+
+                        <!-- Login Link -->
+                        <p class="text-center mb-0">
+                            Already have an account? 
+                            <a href="{% url 'login' %}" class="text-primary text-decoration-none">
+                                Login here
+                            </a>
+                        </p>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+    .form-floating > .input-group {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    
+    .form-floating > .input-group > .form-control {
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
+    }
+    
+    .input-group-text {
+        border-right: 0;
+    }
+    
+    .interest-container {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .interest-container .form-check {
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+<!-- Custom Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const passwordInput = document.querySelector('input[type="password"]');
+    const confirmPasswordInput = document.querySelectorAll('input[type="password"]')[1];
+    
+    function togglePasswordVisibility(button, input) {
+        button.addEventListener('click', function() {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            button.querySelector('i').classList.toggle('fa-eye');
+            button.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    }
+    
+    togglePasswordVisibility(togglePassword, passwordInput);
+    togglePasswordVisibility(toggleConfirmPassword, confirmPasswordInput);
+    
+    // Password strength indicator
+    const strengthBar = document.querySelector('#passwordStrength .progress-bar');
+    
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        
+        if (password.length >= 8) strength += 25;
+        if (password.match(/[A-Z]/)) strength += 25;
+        if (password.match(/[0-9]/)) strength += 25;
+        if (password.match(/[^A-Za-z0-9]/)) strength += 25;
+        
+        strengthBar.style.width = strength + '%';
+        
+        if (strength <= 25) {
+            strengthBar.className = 'progress-bar bg-danger';
+        } else if (strength <= 50) {
+            strengthBar.className = 'progress-bar bg-warning';
+        } else if (strength <= 75) {
+            strengthBar.className = 'progress-bar bg-info';
+        } else {
+            strengthBar.className = 'progress-bar bg-success';
+        }
+    });
+});
+</script>
 {% endblock %}

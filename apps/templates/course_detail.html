@@ -1,121 +1,232 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <!-- User Profile and Course Information -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Your Profile</h5>
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="card-text"><strong>Username:</strong> {{ request.user.username }}</p>
-                    <p class="card-text"><strong>Email:</strong> {{ request.user.email }}</p>
-                    <p class="card-text"><strong>Premium Status:</strong> 
+<div class="container py-5">
+    <!-- Course Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="display-4 mb-3">{{ course.title }}</h1>
+            <p class="lead text-muted">{{ course.description }}</p>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-signal me-2"></i>{{ course.get_difficulty_display }}
+                </span>
+                {% if course.is_premium %}
+                <span class="badge bg-warning">
+                    <i class="fas fa-crown me-2"></i>Premium Course
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- User Profile Card -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-lg me-3">
+                            <i class="fas fa-user-circle fa-3x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-1">{{ request.user.username }}</h5>
+                            <p class="text-muted small mb-0">{{ request.user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted">Premium Status</span>
                         {% if request.user.userprofile.subscription_status %}
-                            <span class="text-success">Yes</span>
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle me-1"></i>Active
+                        </span>
                         {% else %}
-                            <span class="text-danger">No</span>
+                        <span class="badge bg-secondary">
+                            <i class="fas fa-times-circle me-1"></i>Inactive
+                        </span>
                         {% endif %}
-                    </p>
-                    <p class="card-text"><strong>Enrollment Status:</strong> 
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Course Status</span>
                         {% if is_enrolled %}
-                            <span class="text-success">Enrolled in "{{ course.title }}"</span>
+                        <span class="badge bg-primary">
+                            <i class="fas fa-user-graduate me-1"></i>Enrolled
+                        </span>
                         {% else %}
-                            <span class="text-danger">Not Enrolled</span>
+                        <span class="badge bg-danger">
+                            <i class="fas fa-user-times me-1"></i>Not Enrolled
+                        </span>
                         {% endif %}
-                    </p>
-                </div>
-                <div class="col-md-6 text-md-right">
-                    <h1 class="display-4">{{ course.title }}</h1>
-                    <p class="lead">{{ course.description }}</p>
-                    <h4>Difficulty: {{ course.get_difficulty_display }}</h4>
-                    {% if course.is_premium %}
-                        <span class="badge badge-warning">Premium</span>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Video Section -->
+    <!-- Video Player Section -->
     {% if first_video_id %}
-    <div class="mb-4">
-        <iframe class="w-100" height="450" src="https://www.youtube.com/embed/{{ first_video_id }}" frameborder="0" allowfullscreen></iframe>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="ratio ratio-16x9">
+            <iframe src="https://www.youtube.com/embed/{{ first_video_id }}" 
+                    allowfullscreen></iframe>
+        </div>
     </div>
     {% else %}
-    <p>No video found for this course.</p>
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No video content available for this course yet.
+    </div>
     {% endif %}
 
     {% if is_enrolled %}
-    <!-- Course Progress Tracking -->
-    <h4>Course Progress</h4>
-    <div class="progress mt-4">
-        <div class="progress-bar" role="progressbar" style="width: {{ progress.progress }}%;" aria-valuenow="{{ progress.progress }}" aria-valuemin="0" aria-valuemax="100">
-            {{ progress.progress }}% Completed
+    <!-- Progress Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title">
+                <i class="fas fa-chart-line text-primary me-2"></i>Course Progress
+            </h4>
+            <div class="progress mb-3" style="height: 10px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" style="width: {{ progress.progress }}%;">
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted">{{ progress.progress }}% Complete</span>
+                <form method="POST" action="{% url 'blog:update_progress' course_id=course.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="update_progress" value="1">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>Mark Next Lesson Complete
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Update Progress -->
-    <form method="POST" action="{% url 'blog:update_progress' course_id=course.id %}" class="mt-4">
-        {% csrf_token %}
-        <input type="hidden" name="update_progress" value="1">
-        <button type="submit" class="btn btn-success">Mark Next Lesson as Completed</button>
-    </form>
-
-    <!-- Quiz Section -->
+    <!-- Quizzes Section -->
     {% if quizzes %}
-    <h3 class="mt-4">Available Quizzes</h3>
-    <div class="list-group">
-        {% for quiz in quizzes %}
-        <form method="POST" class="mt-2">
-            {% csrf_token %}
-            <input type="hidden" name="start_quiz" value="1">
-            <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-            <button type="submit" class="btn btn-primary mb-2">Start Quiz: {{ quiz.title }}</button>
-        </form>
-        {% endfor %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-question-circle text-primary me-2"></i>Available Quizzes
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                {% for quiz in quizzes %}
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ quiz.title }}</h5>
+                            <form method="POST" class="mt-3">
+                                {% csrf_token %}
+                                <input type="hidden" name="start_quiz" value="1">
+                                <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-play-circle me-2"></i>Start Quiz
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
-    {% else %}
-    <p>No quizzes available for this course.</p>
     {% endif %}
 
     <!-- Quiz Results Section -->
     {% if quiz_results %}
-    <h3 class="mt-4">Quiz Results</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Quiz Title</th>
-                <th>Score</th>
-                <th>Date Taken</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in quiz_results %}
-            <tr>
-                <td>{{ result.quiz.title }}</td>
-                <td>{{ result.score }}</td>
-                <td>{{ result.completed_at|date:"Y-m-d H:i" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="text-center">No quiz results available.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No quiz results available.</p>
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-trophy text-primary me-2"></i>Your Quiz Results
+            </h4>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Quiz</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in quiz_results %}
+                    <tr>
+                        <td>{{ result.quiz.title }}</td>
+                        <td>
+                            <div class="progress" style="width: 100px; height: 6px;">
+                                <div class="progress-bar  bg-success" role="progressbar" 
+                                     style="width: {{ result.score }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ result.score }}%</small>
+                        </td>
+                        <td>{{ result.completed_at|date:"M d, Y" }}</td>
+                        <td>
+                            {% if result.score >= 70 %}
+                            <span class="badge bg-success">Passed</span>
+                            {% else %}
+                            <span class="badge bg-danger">Failed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     {% endif %}
 
     {% else %}
-    <!-- Enrollment Form -->
-    <h4>Enroll in Course</h4>
-    <form method="POST" class="mt-4">
-        {% csrf_token %}
-        <input type="hidden" name="enroll" value="1">
-        <button type="submit" class="btn btn-primary">Enroll in Course</button>
-    </form>
+    <!-- Enrollment Section -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
+            <h4>Ready to Start Learning?</h4>
+            <p class="text-muted">Enroll now to access course content and track your progress.</p>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="enroll" value="1">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Enroll in Course
+                </button>
+            </form>
+        </div>
+    </div>
     {% endif %}
 </div>
+
+<style>
+    .avatar-lg {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .progress {
+        background-color: #e9ecef;
+        border-radius: 0.25rem;
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .badge {
+        padding: 0.5em 1em;
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
 {% endblock %}
