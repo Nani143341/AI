@@ -133,4 +133,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
-YOUTUBE_API_KEY = 'AIzaSyDF-V4T8t9hhagfB09OXlAiS4HU9nrtJEY'
+# YOUTUBE_API_KEY = 'AIzaSyDF-V4T8t9hhagfB09OXlAiS4HU9nrtJEY'
+YOUTUBE_API_KEY = 'AIzaSyB4AB0MbozK8Z-NnYnnXwFFmmALnS_yPAE'

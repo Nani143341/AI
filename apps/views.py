@@ -50,39 +50,88 @@ def edit_blog_post(request, pk):
     return render(request, 'edit_blog_post.html', {'form': form, 'post': post})
 
 
-def loginPage(request):
+def custom_login_view(request):
+    # Redirect authenticated users directly to the home page
     if request.user.is_authenticated:
-        return redirect('/')
-    else:
-        if request.method == 'POST':
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                # Check if user has a profile
-                if hasattr(user, 'profile'):
-                    if user.profile.is_premium:  # Assuming profile stores user role
-                        return redirect('blog:premium_dashboard')
-                    else:
-                        return redirect('blog:home')
-                else:
-                    messages.info(
-                        request, 'Your profile does not exist. Please create a profile to access the dashboard.')
-                    # Redirect to a profile creation page or another appropriate view
-                    return redirect('blog:profile_creation')
+        return redirect('blog:home')
+
+    # Handle POST request for login
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Authenticate user
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+
+            # Check if user has a profile and redirect based on profile role
+            if hasattr(user, 'profile'):
+                if user.profile.is_premium:  # Redirect premium users
+                    return redirect('blog:premium_dashboard')
+                else:  # Redirect non-premium users
+                    return redirect('blog:home')
             else:
-                messages.info(request, 'Incorrect Username or Password')
-        context = {}
-        return render(request, 'login.html', context)
+                # Inform user to create a profile if it doesn't exist
+                messages.info(
+                    request, 'Your profile does not exist. Please create a profile to access the dashboard.')
+                return redirect('blog:login_')
+
+        else:
+            # Show error message for invalid credentials
+            messages.error(
+                request, 'Incorrect Username or Password. Your profile does not exist. Please create a profile to access the dashboard.')
+
+    # Context for rendering login page (can be used for additional data if needed)
+    context = {}
+    return render(request, 'login.html', context)
+
+
+def loginPage(request):
+    # Redirect authenticated users directly to the home page
+    if request.user.is_authenticated:
+        return redirect('blog:home')
+
+    # Handle POST request for login
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Authenticate user
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+
+            # Check if user has a profile and redirect based on profile role
+            if hasattr(user, 'profile'):
+                if user.profile.is_premium:  # Redirect premium users
+                    return redirect('blog:premium_dashboard')
+                else:  # Redirect non-premium users
+                    return redirect('blog:home')
+            else:
+                # Inform user to create a profile if it doesn't exist
+                messages.info(
+                    request, 'Your account does not exist. Please create an account to access the courses.')
+                return redirect('blog:login_')
+
+        else:
+            # Show error message for invalid credentials
+            messages.error(
+                request, 'Incorrect Username or Password. Your account does not exist. Please create an account to access the courses.')
+
+    # Context for rendering login page (can be used for additional data if needed)
+    context = {}
+    return render(request, 'login.html', context)
 
 
 @login_required
 def premium_dashboard(request):
     # Load premium courses and user progress
     courses = Course.objects.filter(is_premium=True)
-    user_progress = request.user.get_course_progress()
-    return render(request, 'premium_dashboard.html', {'courses': courses, 'progress': user_progress})
+    # user_progress = request.user.get_course_progress()
+    return render(request, 'premium_dashboard.html', {'courses': courses})
 
 
 # youtube_service.py
@@ -654,7 +703,7 @@ def profile(request):
     # Fetch user profile and enrolled courses
     user_profile = request.user.userprofile
     enrolled_courses = UserCourseEnrollment.objects.filter(user=request.user)
-
+    print(enrolled_courses)
     return render(request, 'profile.html', {
         'user_profile': user_profile,
         'enrolled_courses': enrolled_courses
@@ -674,20 +723,6 @@ def trending_videos(request):
         'popular_courses_videos': popular_courses_videos,
     }
     return render(request, 'trending_videos.html', context)
-
-
-@login_required
-def profile(request):
-    user_profile = request.user.userprofile
-    courses_progress = user_profile.user.usercourseprogress_set.all()
-    quiz_results = UserQuizResult.objects.filter(user=request.user)
-    badges = UserBadge.objects.filter(user=request.user)
-    return render(request, 'profile.html', {
-        'user_profile': user_profile,
-        'courses_progress': courses_progress,
-        'quiz_results': quiz_results,
-        'badges': badges
-    })
 
 
 def article_list(request):

@@ -3,224 +3,144 @@
 {% block title %}Register - AI Learning Hub{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card border-0 shadow-lg">
-                <div class="card-body p-4 p-md-5">
-                    <!-- Header -->
-                    <div class="text-center mb-4">
-                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
-                        <h2 class="fw-bold">Create Your Account</h2>
-                        <p class="text-muted">Join our community of AI enthusiasts</p>
-                    </div>
+<!-- Hero Section with Background and Introduction -->
+<div class="hero-section position-relative overflow-hidden py-5 mb-5">
+    <div class="container position-relative z-index-1">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-3 fw-bold text-white mb-3">
+                    <i class="fas fa-brain me-2"></i>Welcome to AI Learning Hub
+                </h1>
+                <p class="lead text-white-50 mb-4">Your gateway to AI education and cutting-edge technology insights</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    <!-- Error Messages -->
-                    {% if form.errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <strong>Please correct the following errors:</strong>
-                        <ul class="mb-0 mt-2">
-                            {% for field, errors in form.errors.items %}
-                            <li>{{ field|capfirst }}: {{ errors|join:", " }}</li>
-                            {% endfor %}
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    {% endif %}
-
-                    <!-- Registration Form -->
-                    <form method="post" novalidate class="needs-validation">
-                        {% csrf_token %}
-
-                        <!-- Username Field -->
-                        <div class="form-floating mb-3">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fas fa-user text-muted"></i>
-                                </span>
-                                {{ form.username }}
-                                <label for="{{ form.username.id_for_label }}">Username</label>
+<!-- Registration Section -->
+<div class="container mt-5">
+    <div class="d-flex justify-content-center">
+        <div class="user_card">
+            <div class="d-flex justify-content-center">
+                <h3 id="form-title">REGISTER</h3>
+            </div>
+            <div class="d-flex justify-content-center form_container">
+                <form method="POST" action="{% url 'blog:register' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Username Field -->
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
                             </div>
-                            {% if form.username.errors %}
-                            <div class="invalid-feedback d-block">
+                            <input type="text" name="username" id="username" placeholder="Username..." class="form-control" required>
+                        </div>
+                        {% if form.username.errors %}
+                            <div class="text-danger small">
                                 {{ form.username.errors|join:", " }}
                             </div>
-                            {% endif %}
-                        </div>
+                        {% endif %}
+                    </div>
 
-                        <!-- Email Field -->
-                        <div class="form-floating mb-3">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fas fa-envelope text-muted"></i>
-                                </span>
-                                {{ form.email }}
-                                <label for="{{ form.email.id_for_label }}">Email address</label>
+                    <!-- Email Field -->
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                             </div>
-                            {% if form.email.errors %}
-                            <div class="invalid-feedback d-block">
+                            <input type="email" name="email" id="email" placeholder="Email..." class="form-control" required>
+                        </div>
+                        {% if form.email.errors %}
+                            <div class="text-danger small">
                                 {{ form.email.errors|join:", " }}
                             </div>
-                            {% endif %}
-                        </div>
+                        {% endif %}
+                    </div>
 
-                        <!-- Password Field -->
-                        <div class="form-floating mb-3">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fas fa-lock text-muted"></i>
-                                </span>
-                                {{ form.password }}
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <div class="input-group mb-2">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
                             </div>
-                            <div id="passwordStrength" class="progress mt-2" style="height: 5px;">
-                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            {% if form.password.errors %}
-                            <div class="invalid-feedback d-block">
+                            <input type="password" name="password" id="password" placeholder="Password..." class="form-control" required>
+                        </div>
+                        <small class="form-text text-muted">Your password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.</small>
+                        {% if form.password.errors %}
+                            <div class="text-danger small">
                                 {{ form.password.errors|join:", " }}
                             </div>
-                            {% endif %}
-                        </div>
+                        {% endif %}
+                    </div>
 
-                        <!-- Confirm Password Field -->
-                        <div class="form-floating mb-3">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fas fa-lock text-muted"></i>
-                                </span>
-                                {{ form.confirm_password }}
-                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                    <!-- Confirm Password Field -->
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password:</label>
+                        <div class="input-group mb-2">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
                             </div>
-                            {% if form.confirm_password.errors %}
-                            <div class="invalid-feedback d-block">
+                            <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password..." class="form-control" required>
+                        </div>
+                        <small class="form-text text-muted">Please re-enter your password for confirmation.</small>
+                        {% if form.confirm_password.errors %}
+                            <div class="text-danger small">
                                 {{ form.confirm_password.errors|join:", " }}
                             </div>
-                            {% endif %}
-                        </div>
+                        {% endif %}
+                    </div>
 
-                        <!-- Interests Field -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-tags me-2"></i>Select Your Interests
-                            </label>
-                            <div class="interest-container border rounded p-3">
-                                {{ form.interests }}
-                            </div>
-                            {% if form.interests.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.interests.errors|join:", " }}
-                            </div>
-                            {% endif %}
-                        </div>
+                    <!-- Registration Button -->
+                    <div class="d-flex justify-content-center mt-3 login_container">
+                        <input class="btn btn-primary" type="submit" value="Register">
+                    </div>
+                </form>
+            </div>
 
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
-                            <i class="fas fa-user-plus me-2"></i>Create Account
-                        </button>
+            <!-- Message Display -->
+            <div class="mt-4">
+                {% if messages %}
+                    <div class="alert alert-warning">
+                        <strong>Messages:</strong>
+                        <ul class="mb-0">
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
 
-                        <!-- Login Link -->
-                        <p class="text-center mb-0">
-                            Already have an account? 
-                            <a href="{% url 'login' %}" class="text-primary text-decoration-none">
-                                Login here
-                            </a>
-                        </p>
-                    </form>
+            <div class="mt-4">
+                <div class="d-flex justify-content-center links">
+                    Already have an account? <a href="{% url 'blog:login' %}" class="ml-2">Sign In</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Custom Styles -->
 <style>
-    .form-floating > .input-group {
+    .hero-section {
+        background: linear-gradient(135deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+        min-height: 300px;
         display: flex;
-        flex-wrap: nowrap;
+        align-items: center;
     }
-    
-    .form-floating > .input-group > .form-control {
-        border-start-start-radius: 0;
-        border-end-start-radius: 0;
+    .user_card {
+        padding: 20px;
+        width: 100%;
+        max-width: 400px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    
-    .input-group-text {
-        border-right: 0;
-    }
-    
-    .interest-container {
-        max-height: 200px;
-        overflow-y: auto;
-    }
-    
-    .interest-container .form-check {
-        margin-bottom: 0.5rem;
-    }
-    
-    .progress-bar {
-        transition: width 0.3s ease;
-    }
-    
-    .card {
-        transition: transform 0.3s ease;
-    }
-    
-    .card:hover {
-        transform: translateY(-5px);
+    .hero-section h1, .hero-section p {
+        color: #fff;
     }
 </style>
-
-<!-- Custom Scripts -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Password visibility toggle
-    const togglePassword = document.getElementById('togglePassword');
-    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-    const passwordInput = document.querySelector('input[type="password"]');
-    const confirmPasswordInput = document.querySelectorAll('input[type="password"]')[1];
-    
-    function togglePasswordVisibility(button, input) {
-        button.addEventListener('click', function() {
-            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-            input.setAttribute('type', type);
-            button.querySelector('i').classList.toggle('fa-eye');
-            button.querySelector('i').classList.toggle('fa-eye-slash');
-        });
-    }
-    
-    togglePasswordVisibility(togglePassword, passwordInput);
-    togglePasswordVisibility(toggleConfirmPassword, confirmPasswordInput);
-    
-    // Password strength indicator
-    const strengthBar = document.querySelector('#passwordStrength .progress-bar');
-    
-    passwordInput.addEventListener('input', function() {
-        const password = this.value;
-        let strength = 0;
-        
-        if (password.length >= 8) strength += 25;
-        if (password.match(/[A-Z]/)) strength += 25;
-        if (password.match(/[0-9]/)) strength += 25;
-        if (password.match(/[^A-Za-z0-9]/)) strength += 25;
-        
-        strengthBar.style.width = strength + '%';
-        
-        if (strength <= 25) {
-            strengthBar.className = 'progress-bar bg-danger';
-        } else if (strength <= 50) {
-            strengthBar.className = 'progress-bar bg-warning';
-        } else if (strength <= 75) {
-            strengthBar.className = 'progress-bar bg-info';
-        } else {
-            strengthBar.className = 'progress-bar bg-success';
-        }
-    });
-});
-</script>
-{% endblock %}
+{% endblock content %}

@@ -2,9 +2,11 @@
 
 from django import forms
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 
-from .models import (Article, BlogPost, Course, ForumComment, ForumThread,
-                     Interest, Quiz, UserProfile)
+from .models import (  # Adjust the import based on your project structure
+    Article, BlogPost, Course, ForumComment, ForumThread, Interest, Quiz, User,
+    UserProfile)
 
 
 class MyForm(forms.ModelForm):
@@ -45,8 +47,23 @@ class NewThreadForm(forms.ModelForm):
 
 
 class UserRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
-    confirm_password = forms.CharField(widget=forms.PasswordInput)
+    password = forms.CharField(
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                # At least 8 characters, one letter, and one special character
+                regex=r'^(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$',
+                message="Password must be at least 8 characters long and include at least one letter and one special character."
+            )
+        ],
+        help_text="Your password must be at least 8 characters long, including at least one letter and one special character."
+    )
+
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput,
+        help_text="Please re-enter your password for confirmation."
+    )
+
     interests = forms.ModelMultipleChoiceField(
         queryset=Interest.objects.all(),
         widget=forms.CheckboxSelectMultiple,
@@ -60,8 +77,17 @@ class UserRegistrationForm(forms.ModelForm):
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
+
+        # Check if username starts with an alphabet character
         if not username[0].isalpha():
-            raise forms.ValidationError("Username must start with a letter.")
+            raise forms.ValidationError(
+                "Username must start with an alphabet character.")
+
+        # Check if username consists of only digits
+        if username.isdigit():
+            raise forms.ValidationError(
+                "Username cannot consist of only numbers.")
+
         return username
 
     def clean(self):
@@ -70,7 +96,7 @@ class UserRegistrationForm(forms.ModelForm):
         confirm_password = cleaned_data.get("confirm_password")
 
         if password and confirm_password and password != confirm_password:
-            self.add_error('confirm_password', "Passwords do not match.")
+            self.add_error("confirm_password", "Passwords do not match.")
 
         return cleaned_data
 

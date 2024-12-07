@@ -13,7 +13,7 @@ The AI Learning Hub is a platform designed to provide educational resources and 
 - **Payment Integration**: Handles subscription payments for premium users.
 - **News Feed**: Displays the latest AI-related news.
 
-## Technologies Used
+## Technologies 
 
 - Django (Web Framework)
 - Django REST Framework (API)
